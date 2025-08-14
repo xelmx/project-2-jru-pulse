@@ -1,0 +1,149 @@
+/* Sidebar */
+    .sidebar-transition {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .chart-container {
+        position: relative;
+        height: 220px;
+        width: 100%;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 180px;
+        }
+    }
+
+    .sidebar-collapsed {
+        width: 5rem;
+    }
+
+    .sidebar-expanded {
+        width: 16rem;
+    }
+
+    .menu-text {
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .logo-transition {
+        transition: all 0.3s ease;
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #a1a1a1;
+    }
+
+/* Take survey */
+    .emoji-label.is-pressing {
+        transform: scale(1.25);
+        transition: transform 0.1s ease-in;
+    }
+    .emoji-label.is-pressing .number-popup { /* Make the number pop-up visible and move it slightly when pressed */
+        opacity: 1;
+        transform: translateY(-5px);
+    }
+
+    /*Survey builder */
+    .question-item {
+        transition: all 0.3s ease;
+    }
+
+    .question-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .sortable-ghost {
+        opacity: 0.4;
+    }
+
+    .sortable-chosen {
+        transform: rotate(5deg);
+    }
+
+    .drag-handle {
+        cursor: grab;
+    }
+
+    .drag-handle:active {
+        cursor: grabbing;
+    }
+
+
+    /* Dasboard Styles */
+.sidebar-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-container {
+    position: relative;
+    height: 220px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 180px;
+    }
+}
+
+.sidebar-collapsed {
+    width: 5rem;
+}
+
+.sidebar-expanded {
+    width: 16rem;
+}
+
+.menu-text {
+    transition: opacity 0.2s ease-in-out;
+}
+
+.logo-transition {
+    transition: all 0.3s ease;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+.sidebar-collapsed #logoContainer {
+    display: none;
+}
+
+.sidebar-expanded #logoContainer {
+    display: flex; /* This restores its original display: flex behavior */
+}
+.sidebar-collapsed .p-4.border-b.border-gray-700.flex.items-center.justify-between {
+    justify-content: center; /* This will center the button when the logo is hidden */
+}

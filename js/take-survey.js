@@ -1,0 +1,384 @@
+    // Holds all information for the user's entire session.
+    const surveyState = {
+        surveyId: null,
+        respondent: { type: null, identifier: null, first_name: null, last_name: null, id: null },
+        surveyData: null,
+        answers: {},
+        currentQuestionIndex: 0,
+    };
+
+    function showScreen(screenName, message = '') {
+    const screens = {
+        identity: document.getElementById('identityScreen'),
+        student: document.getElementById('studentScreen'),
+        guest: document.getElementById('guestScreen'),
+        survey: document.getElementById('surveyScreen'),
+        loading: document.getElementById('loadingScreen'),
+        thankYou: document.getElementById('thankYouScreen')
+    };
+    Object.values(screens).forEach(screen => {
+        if (screen) screen.classList.add('hidden');
+    });
+    if (screens[screenName]) {
+        if (screenName === 'loading') {
+            const loadingMessageEl = document.getElementById('loadingMessage');
+            if (loadingMessageEl) loadingMessageEl.textContent = message;
+        }
+        screens[screenName].classList.remove('hidden');
+    }
+}
+
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    surveyState.surveyId = urlParams.get('id');
+    if (!surveyState.surveyId) {
+        document.getElementById('mainContainer').innerHTML = `<div class="p-8 text-center text-red-600">Error: No Survey ID was provided.</div>`;
+        return;
+    }
+    initializeTakeSurveyFlow();
+});
+
+function onGoogleLibraryLoad() {
+    console.log("Google GSI library has loaded.");
+    // Check if the student screen is already visible. If so, render the button.
+    if (!document.getElementById('studentScreen').classList.contains('hidden')) {
+        const studentConsentCheck = document.getElementById('studentConsentCheck');
+        if (studentConsentCheck) {
+            // Triggering a 'change' event will call our renderGoogleButton function.
+            studentConsentCheck.dispatchEvent(new Event('change'));
+        }
+    }
+}
+
+function initializeTakeSurveyFlow() {
+    // Get references to all elements
+    const studentBtn = document.getElementById('studentBtn');
+    const guestBtn = document.getElementById('guestBtn');
+    const goBackBtns = document.querySelectorAll('.go-back-btn');
+    const studentConsentCheck = document.getElementById('studentConsentCheck');
+    const googleSignInContainer = document.getElementById('googleSignInButton');
+    const guestConsentCheck = document.getElementById('guestConsentCheck');
+    const guestContinueBtn = document.getElementById('guestContinueBtn');
+    const guestForm = document.getElementById('guestForm');
+    const termsModal = document.getElementById('termsModal');
+    const viewTermsLinks = document.querySelectorAll('#viewTermsStudent, #viewTermsGuest');
+    const closeTermsModalBtns = document.querySelectorAll('#closeTermsModal, #closeTermsModalFooter'); // Fixed
+
+    // Event Listeners
+    studentBtn.addEventListener('click', () => {
+        showScreen('student');
+        renderGoogleButton();
+    });
+    guestBtn.addEventListener('click', () => showScreen('guest'));
+    goBackBtns.forEach(btn => btn.addEventListener('click', () => showScreen('identity')));
+    studentConsentCheck.addEventListener('change', renderGoogleButton);
+    guestConsentCheck.addEventListener('change', () => {
+        guestContinueBtn.disabled = !guestConsentCheck.checked;
+    });
+
+    guestForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const dataToSend = {
+            type: 'guest',
+            identifier: document.getElementById('guestEmail').value,
+            first_name: document.getElementById('guestFirstName').value,
+            last_name: document.getElementById('guestLastName').value,
+            role: document.getElementById('guestRole').value
+        };
+        registerAndProceed(dataToSend);
+    });
+
+    viewTermsLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            if(termsModal) termsModal.classList.remove('hidden');
+        });
+    });
+    closeTermsModalBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (termsModal) termsModal.classList.add('hidden');
+        });
+    });
+
+    // Google Sign-In Logic
+    function renderGoogleButton() {
+        if (!studentConsentCheck.checked) {
+            googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><span class="font-medium text-gray-500">Please agree to the terms to enable sign-in.</span></div>`;
+            return;
+        }
+        try {
+            if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+                googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><i class="fas fa-spinner fa-spin"></i><span class="font-medium text-gray-500 ml-2">Loading Sign-In...</span></div>`;
+                return;
+            }
+            google.accounts.id.initialize({
+                client_id: "913799866499-p05hvm7muoaiqogtp85d0s95jiuavfuv.apps.googleusercontent.com",
+                callback: handleGoogleSignIn
+            });
+            google.accounts.id.renderButton(googleSignInContainer, { theme: "outline", size: "large", width: "380", text: "signin_with" });
+        } catch (error) {
+            googleSignInContainer.innerHTML = `<p class="text-center text-red-500">Could not load Google Sign-In.</p>`;
+        }
+    }
+    
+    // Initially, show the identity screen
+    showScreen('identity');
+}
+
+   function handleGoogleSignIn(googleResponse) {
+    const userInfo = parseJWT(googleResponse.credential);
+    if (!userInfo || !userInfo.email.endsWith('@my.jru.edu')) {
+        alert("Sign-in failed. Please use a valid JRU student email account (@my.jru.edu).");
+        return;
+    }
+    const dataToSend = { type: 'student', identifier: userInfo.email, first_name: userInfo.given_name, last_name: userInfo.family_name };
+    registerAndProceed(dataToSend);
+}
+
+    async function registerAndProceed(dataToSend) {
+    showScreen('loading', 'Verifying your session...');
+    try {
+        const response = await fetch('api/register-respondent.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSend) });
+        const result = await response.json();
+        if (result.success) {
+            surveyState.respondent = { ...dataToSend, id: result.data.respondent_id };
+            fetchAndPrepareSurvey();
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+        showScreen('identity');
+        alert(`Verification Failed: ${error.message}`);
+    }
+}
+    function parseJWT(token) {  // --- Helper Functions (including custom JWT parser) ---
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) { return null; }
+    }
+
+     function renderError(message) {
+        surveyContainer.innerHTML = `<div class="text-center py-8 bg-red-50 p-6 rounded-lg"><i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i><h1 class="text-2xl font-bold text-red-600">An Error Occurred</h1><p class="text-gray-700 mt-2">${message}</p></div>`;
+    }
+
+    function renderLoading(message) {
+        surveyContainer.innerHTML = `
+            <div class="text-center py-8">
+                <h1 class="text-2xl font-bold text-gray-900">${message}</h1>
+                <!-- Optional: You could add a spinning icon here for a better visual effect -->
+                <i class="fas fa-spinner fa-spin text-jru-blue text-4xl mt-4"></i>
+            </div>
+        `;
+    }
+
+
+    async function fetchAndPrepareSurvey() {
+    document.getElementById('surveyHeader').classList.remove('hidden');
+    showScreen('loading', 'Loading survey questions...');
+    try {
+        const response = await fetch(`api/surveys.php?id=${surveyState.surveyId}`);
+        const result = await response.json();
+        if (result.success) {
+            surveyState.surveyData = result.data;
+            surveyState.surveyData.questions = JSON.parse(result.data.questions_json);
+            document.getElementById('surveyTitle').textContent = surveyState.surveyData.title;
+            document.getElementById('surveyDescription').textContent = surveyState.surveyData.description;
+
+            if (Array.isArray(surveyState.surveyData.questions) && surveyState.surveyData.questions.length > 0) {
+                surveyState.currentQuestionIndex = 0;
+                renderQuestionStage();
+                showScreen('survey');
+            } else {
+                 showScreen('identity');
+                 alert("This survey currently has no questions.");
+            }
+        } else {
+            throw new Error(result.message);
+        }
+    } catch (error) {
+         showScreen('identity');
+         alert(`Error: ${error.message}`);
+    }
+}
+
+
+    function renderQuestionStage() {
+        const surveyScreen = document.getElementById('surveyScreen');
+        const questions = surveyState.surveyData.questions;
+        const currentIndex = surveyState.currentQuestionIndex;
+        const currentQuestion = questions[currentIndex];
+        
+        surveyScreen.innerHTML = `
+            <div class="mb-4">
+                <p class="text-sm font-bold text-jru-blue">Question ${currentIndex + 1} of ${questions.length}</p>
+                <div class="w-full bg-gray-200 rounded-full mt-1"><div class="bg-jru-blue h-2 rounded-full" style="width: ${((currentIndex + 1) / questions.length) * 100}%"></div></div>
+            </div>
+            <div class="py-4">
+                <label class="block text-lg font-semibold text-gray-800 mb-2">${currentQuestion.text} ${currentQuestion.required ? '<span class="text-red-500 ml-1">*</span>' : ''}</label>
+                <p class="text-sm text-gray-500 mb-4">${currentQuestion.help || ''}</p>
+                ${renderInputForQuestion(currentQuestion)}
+            </div>
+            <div id="warning-spot" class="mt-4"></div>
+            <div class="mt-8 flex justify-between items-center">
+                <button id="backBtn" class="${currentIndex === 0 ? 'invisible' : ''} bg-gray-600 text-white py-2 px-6 rounded-lg font-semibold">Back</button>
+                <button id="nextBtn" class="bg-jru-blue text-white py-2 px-6 rounded-lg font-semibold">${currentIndex === questions.length - 1 ? 'Finish & Submit' : 'Next'}</button>
+            </div>
+        `;
+        document.getElementById('backBtn').onclick = handleBack;
+        document.getElementById('nextBtn').onclick = handleNext;
+        setupQuestionInteractivity();
+    }
+        function handleBack() {
+            if (surveyState.currentQuestionIndex > 0) {
+                surveyState.currentQuestionIndex--;
+                renderQuestionStage();
+            }
+        }
+
+        function handleNext() {
+            const currentQuestion = surveyState.surveyData.questions[surveyState.currentQuestionIndex];
+            const inputName = `q_${currentQuestion.id}`;
+            const inputWrapper = document.getElementById('question-input-wrapper');
+            let inputValue = null;
+            const inputElement = inputWrapper.querySelector(`[name="${inputName}"]`);
+            if (inputElement) {
+                if (inputElement.type === 'radio') {
+                    const checkedRadio = inputWrapper.querySelector(`[name="${inputName}"]:checked`);
+                    if (checkedRadio) inputValue = checkedRadio.value;
+                } else {
+                    inputValue = inputElement.value;
+                }
+            }
+            const warningSpot = document.getElementById('warning-spot');
+            if (currentQuestion.required && (!inputValue || inputValue.trim() === '')) {
+                warningSpot.innerHTML = `<div class="text-red-600 font-semibold text-sm p-3 bg-red-50 rounded-lg"><i class="fas fa-exclamation-circle mr-2"></i>This question is required.</div>`;
+                setTimeout(() => { warningSpot.innerHTML = ''; }, 3000);
+                return;
+            }
+            warningSpot.innerHTML = '';
+            surveyState.answers[inputName] = inputValue;
+            if (surveyState.currentQuestionIndex < surveyState.surveyData.questions.length - 1) {
+                surveyState.currentQuestionIndex++;
+                renderQuestionStage();
+            } else {
+                submitSurveyResponse();
+            }
+        }
+
+    async function submitSurveyResponse() {
+        showScreen('loading', 'Submitting your feedback...');
+        const finalAnswers = Object.entries(surveyState.answers).map(([key, value]) => {
+            const qId = key.split('_')[1];
+            const question = surveyState.surveyData.questions.find(q => q.id == qId);
+            return { question_id: qId, text: question ? question.text : 'Unknown', answer: value };
+        });
+        const finalSubmissionData = { survey_id: surveyState.surveyId, respondent: surveyState.respondent, answers: finalAnswers };
+        try {
+            const response = await fetch('api/submit-response.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(finalSubmissionData) });
+            const result = await response.json();
+            if (result.success) {
+                document.getElementById('surveyHeader').classList.add('hidden');
+                document.getElementById('thankYouMessage').textContent = result.message;
+                showScreen('thankYou');
+            } else {
+                alert(`Submission Error: ${result.message}`);
+                showScreen('survey'); // Go back to the survey screen
+            }
+        } catch (error) {
+            alert("A network error occurred. Please try submitting again.");
+            showScreen('survey');
+        }
+    }
+
+
+   function renderInputForQuestion(question) { // --- UTILITY & HELPER FUNCTIONS ---
+        const name = `q_${question.id}`;
+        const savedAnswer = surveyState.answers[name] || '';
+
+        let content = `<div id="question-input-wrapper">`;   // We will use a simple DIV as a wrapper for the inputs. give it a unique ID so we can easily find it later.
+
+        switch (question.type) {
+        case 'likert': // Emoji Scale  
+        const emojis = [
+            { emoji: '😄', value: 5, label: 'Excellent' },
+            { emoji: '😊', value: 4, label: 'Very Good' },
+            { emoji: '😐', value: 3, label: 'Good' },
+            { emoji: '🙁', value: 2, label: 'Fair' },
+            { emoji: '😞', value: 1, label: 'Poor' }
+        ];
+
+        content += `
+            <div class="flex justify-center space-x-2 md:space-x-4">
+                ${emojis.map(item => `
+                    <label class="emoji-label relative flex flex-col items-center cursor-pointer text-center p-2 transition-transform duration-200 ease-in-out">
+                        
+                        <!-- The Emoji -->
+                        <span class="text-4xl md:text-5xl">${item.emoji}</span>
+                        
+                        <!-- The Text Label (starts hidden) -->
+                        <span class="emoji-text-popup mt-2 text-xs text-gray-600 font-semibold opacity-0 transition-opacity">
+                            ${item.label}
+                        </span>
+                        
+                        <!-- The Radio Button (hidden) -->
+                        <input type="radio" name="${name}" value="${item.value}" class="sr-only peer" ${savedAnswer == item.value ? 'checked' : ''}>
+                        
+                        <!-- The Checkmark Indicator -->
+                        <div class="w-4 h-4 rounded-full border-2 border-gray-300 mt-2 peer-checked:bg-jru-blue peer-checked:border-jru-blue"></div>
+                    </label>
+                `).join('')}
+            </div>`;
+        break;
+            
+            case 'rating':
+                content += `<div class="flex justify-center items-center text-4xl text-gray-300 star-rating" data-selected-value="${savedAnswer}">
+                    ${[5,4,3,2,1].map(i => `<i class="${i <= savedAnswer ? 'fas text-yellow-400' : 'far'} fa-star cursor-pointer p-1" data-value="${i}"></i>`).join('')}
+                </div>
+                <input type="hidden" name="${name}" value="${savedAnswer}">`;
+                break;
+
+            case 'textarea':
+                content += `<textarea name="${name}" rows="4" class="w-full p-3 border border-gray-300 rounded-lg">${savedAnswer}</textarea>`;
+                break;
+            
+            default:
+                content += `<p class="text-red-500 italic">This question type is not supported.</p>`;
+        }
+        content += '</div>'; // Close the DIV tag instead of the FORM tag.
+        return content;
+    }
+
+     function setupQuestionInteractivity() {
+        document.querySelectorAll('.emoji-label').forEach(label => {  // Emoji Hover Interactivity
+            const textPopup = label.querySelector('.emoji-text-popup');
+            
+            label.addEventListener('mouseenter', () => {  // When the mouse enters/hover the label area
+                label.style.transform = 'scale(1.15)'; // Enlarge the whole label
+                if (textPopup) {
+                    textPopup.style.opacity = '1'; // Make text visible
+                }
+            });
+
+            label.addEventListener('mouseleave', () => {   // When the mouse leaves the label area
+                label.style.transform = 'scale(1)'; // Return to normal size
+                if (textPopup) {
+                    textPopup.style.opacity = '0'; // Make text invisible
+                }
+            });
+        });
+        
+        document.querySelectorAll('.emoji-label input[type="radio"]').forEach(radio => { // Re-check selected radio button for emojis
+            radio.addEventListener('change', () => {
+                // Un-style all siblings
+                radio.closest('.flex').querySelectorAll('.emoji-label .w-4').forEach(div => div.classList.remove('bg-jru-blue', 'border-jru-blue'));
+                // Style the selected one
+                if(radio.checked) {
+                    radio.nextElementSibling.classList.add('bg-jru-blue', 'border-jru-blue');
+                }
+            });
+        });
+    }

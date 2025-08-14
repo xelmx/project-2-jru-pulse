@@ -1,0 +1,8 @@
+{
+    "name": "jru/pulse",
+    "description": "JRU-PULSE Survey Platform Capstone Project",
+    "require": {
+        "php": ">=8.1",
+        "google/apiclient": "^2.15.0"
+    }
+}
