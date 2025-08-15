@@ -11,7 +11,6 @@ if ($_SERVER["REQUEST_METHOD"] == 'OPTIONS') {
 
 require_once '../config/connection.php';
 
-
 //Standard function to send back responses.
 function respond($success, $message, $data = null, $code = 200){
     http_response_code($code);
