@@ -1,4 +1,3 @@
-
 <?php
 session_start(); // Start the session to check for login data
 
@@ -20,6 +19,7 @@ if ($error === 'unauthorized') {
 }
 
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -79,8 +79,7 @@ if ($error === 'unauthorized') {
                 </div>
                 <div class="mt-8 pt-6 border-t border-gray-100 text-center">
                     <p class="text-xs text-gray-400">
-                          José Rizal University <!-- This PHP won't work in .html, change to static or use .php extension -->
-                        <!-- Simpler: © <span id="year"></span> Jose Rizal University -->
+                          José Rizal University 
                     </p>
                     <p class="text-xs text-gray-400 mt-1">
                        © Performance & User-satisfaction Linked Service Evaluation
