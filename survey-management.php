@@ -1,3 +1,18 @@
+<?php
+session_start(); //the very first thing on the page
+
+//Check if user is logged in and is an admin
+if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
+    
+    // If not logged in or not an admin, redirect to the login page
+    header('Location: index.php?error=auth_required');
+    exit;
+}
+
+$user = $_SESSION['user_data'];
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,9 +21,11 @@
     <title>Survey Management - JRU-A-PULSE</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
-    <link href="css/output.css" rel="stylesheet">
-   
+    <link rel="stylesheet" href="css/output.css">
 </head>
+<style>
+    ad
+</style>
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
