@@ -1,3 +1,18 @@
+<?php
+session_start(); //the very first thing on the page
+
+//Check if user is logged in and is an admin
+if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
+    
+    // If not logged in or not an admin, redirect to the login page
+    header('Location: index.php?error=auth_required');
+    exit;
+}
+
+$user = $_SESSION['user_data'];
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
