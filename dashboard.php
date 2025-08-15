@@ -1,9 +1,11 @@
 <?php
-session_start();
+session_start(); //the very first thing on the page
 
 //Check if user is logged in and is an admin
 if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
-    header('Location: index.html?error=auth_required');
+    
+    // If not logged in or not an admin, redirect to the login page
+    header('Location: index.php?error=auth_required');
     exit;
 }
 
@@ -21,48 +23,8 @@ $user = $_SESSION['user_data'];
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/output.css" rel="stylesheet">
-
-    <style>
-        .chart-container.loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1e3a8a;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .sidebar-transition { transition: all .3s cubic-bezier(.4, 0, .2, 1); }
-        .chart-container { position: relative; height: 220px; width: 100%; }
-        @media (max-width: 768px) { .chart-container { height: 180px; } }
-        .sidebar-collapsed { width: 5rem; }
-        .sidebar-expanded { width: 16rem; }
-        .menu-text { transition: opacity .2s ease-in-out; }
-        .logo-transition { transition: all .3s ease; }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a1a1a1; }
-
-        .filter-btn { background-color: #f3f4f6; color: #4b5563; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s; border: 1px solid #d1d5db; }
-        .filter-btn.active { background-color: #1e3a8a; color: #ffffff; font-weight: 600; border-color: #1e3a8a; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
-        .filter-btn:hover:not(.active) { background-color: #e5e7eb; }
-        .modal-overlay { transition: opacity 0.3s ease; }
-        #notification-dropdown { display: none; }
-        .notification-item:hover { background-color: #f3f4f6; }
-    </style>
+    <link href="css/output.css" rel="stylesheet">  
+    <link rel="stylesheet" href="css/dashboard.css">
 </head>
 
 <body class="bg-gray-50 font-sans">
