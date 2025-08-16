@@ -1,23 +1,66 @@
-
 document.addEventListener('DOMContentLoaded', () => {
-    // GLOBAL REFERENCES
+    //Global Variables
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     const presetFiltersContainer = document.getElementById('preset-filters');
     let trendsChart;
+    let ratingDistChart; // Chart for Rating Distribution
 
-    // --- SIDEBAR LOGIC 
-    const sidebar = document.getElementById('sidebar');
+    // --- SIDEBAR LOGIC (No Changes) ---
+   const sidebar = document.getElementById('sidebar');     // Sidebar toggle functionality
     const sidebarToggle = document.getElementById('sidebarToggle');
-    if (sidebar && sidebarToggle) {
-        sidebarToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('sidebar-collapsed');
-            sidebar.classList.toggle('sidebar-expanded');
-        });
-    }
+    const logoContainer = document.getElementById('logoContainer');
+    const menuTexts = document.querySelectorAll('.menu-text');
+    const userInfo = document.getElementById('userInfo');
+    const quickActionsHeader = document.getElementById('quickActionsHeader');
 
-    // --- CHART INITIALIZATION ---
+    let sidebarCollapsed = false;
+    let qrCodeObject = null;
+
+    function toggleSidebar(){
+        sidebarCollapsed = !sidebarCollapsed;
+
+        if (sidebarCollapsed){
+            sidebar.classList.remove('sidebar-expanded');
+            sidebar.classList.add('sidebar-collapsed');
+
+            menuTexts.forEach(text => {  //Itago ang mga tekstual na elemento
+                text.style.opacity = '0';
+                setTimeout(() => {
+                    text.style.display = 'none';
+                }, 150);
+            });
+
+            logoContainer.style.opacity ='0'; 
+            setTimeout(() => {
+            logoContainer.style.display = 'none';
+            }, 150);
+
+        } else {
+            sidebar.classList.remove('sidebar-collapsed'); //Ipakita ang mga tekstual na elemento
+            sidebar.classList.add('sidebar-expanded');
+            
+            setTimeout(() => {
+                menuTexts.forEach(text => {
+                    text.style.display = 'block';
+                    setTimeout(() => {
+                        text.style.opacity = '1';
+                    }, 50);
+                });
+
+            logoContainer.style.display = 'flex';  //Ipakita ang logo
+            setTimeout(() => {
+                logoContainer.style.opacity = '1';
+            }, 50);
+        }, 150);
+        }
+    }
+        
+    sidebarToggle.addEventListener('click', toggleSidebar); 
+
+    // --- CHART INITIALIZATION 
     function initializeCharts() {
+        // Trends Chart 
         const trendsCtx = document.getElementById('trendsChart').getContext('2d');
         trendsChart = new Chart(trendsCtx, {
             type: 'line',
@@ -25,10 +68,50 @@ document.addEventListener('DOMContentLoaded', () => {
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 5 } } }
         });
 
-        // Note: ML charts are placeholders until we integrate the ML model
+        // Initialize the Rating Distribution Bar Chart -->
+        const ratingCtx = document.getElementById('ratingDistChart').getContext('2d');
+        ratingDistChart = new Chart(ratingCtx, {
+            type: 'bar',
+            data: {
+                labels: ['5', '4', '3', '2', '1'],
+                datasets: [{
+                    label: 'Count',
+                    data: [0, 0, 0, 0, 0],
+                    backgroundColor: ['#22c55e', '#3b82f6', '#facc15', '#f97316', '#ef4444'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.raw} responses`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0 // Ensure y-axis shows only whole numbers
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false // Hide the vertical grid lines
+                        }
+                    }
+                }
+            }
+        });
     }
 
-    //  DATA FETCHING & UI UPDATING
+    // --- DATA FETCHING--
     async function updateDashboard(params = {}) {
         document.getElementById('metrics-grid').style.opacity = '0.5';
         const queryParams = new URLSearchParams(params);
@@ -45,16 +128,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- UI UPDATING  ---
     function updateUI(data) {
         // Update date inputs
         startDateInput.value = data.startDate;
         endDateInput.value = data.endDate;
 
-        // Update metric cards
+        // Update metric cards (no change)
         document.getElementById('total-responses').textContent = data.total_responses.toLocaleString();
         const overallScore = data.overall_satisfaction.toFixed(1);
         document.getElementById('overall-satisfaction-score').textContent = overallScore;
-
+        const start = new Date(data.startDate);
+        const end = new Date(data.endDate);
+        const dayDifference = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        const dailyAverage = (data.total_responses / (dayDifference > 0 ? dayDifference : 1)).toFixed(1);
+        document.getElementById('feedback-frequency').textContent = dailyAverage;
         const starsContainer = document.getElementById('overall-satisfaction-stars');
         starsContainer.innerHTML = '';
         const roundedStars = Math.round(data.overall_satisfaction);
@@ -62,23 +150,20 @@ document.addEventListener('DOMContentLoaded', () => {
             starsContainer.innerHTML += `<i class="${i <= roundedStars ? 'fas' : 'far'} fa-star text-jru-gold"></i>`;
         }
         
-        // Rating Distribution
+        // Update the Rating Distribution Chart -->
         document.getElementById('rating-dist-total').textContent = `${data.total_responses.toLocaleString()} total`;
-        const ratingContainer = document.getElementById('rating-distribution-bars');
-        ratingContainer.innerHTML = '';
-        const ratingColors = { 5: 'bg-green-500', 4: 'bg-blue-500', 3: 'bg-yellow-500', 2: 'bg-orange-500', 1: 'bg-red-500' };
-        for (let i = 5; i >= 1; i--) {
-            const count = data.rating_distribution[i] || 0;
-            const percentage = data.total_responses > 0 ? (count / data.total_responses) * 100 : 0;
-            ratingContainer.innerHTML += `
-                <div class="flex items-center text-xs">
-                    <span class="w-3">${i}</span>
-                    <div class="flex-1 mx-2 bg-gray-200 rounded-full h-1.5"><div class="${ratingColors[i]} h-1.5 rounded-full" style="width: ${percentage}%"></div></div>
-                    <span class="w-8 text-right">${count.toLocaleString()}</span>
-                </div>`;
-        }
+        // Prepare the data array in the correct order [5-star, 4-star, ..., 1-star]
+        const newRatingData = [
+            data.rating_distribution[5] || 0,
+            data.rating_distribution[4] || 0,
+            data.rating_distribution[3] || 0,
+            data.rating_distribution[2] || 0,
+            data.rating_distribution[1] || 0
+        ];
+        ratingDistChart.data.datasets[0].data = newRatingData;
+        ratingDistChart.update();
 
-        // DYNAMICALLY Service Performance
+        // Service Performance
         const performanceContainer = document.getElementById('service-performance-bars');
         performanceContainer.innerHTML = '';
         if (data.service_performance.length > 0) {
@@ -98,11 +183,27 @@ document.addEventListener('DOMContentLoaded', () => {
         trendsChart.data.labels = data.trends_labels;
         trendsChart.data.datasets[0].data = data.trends_data;
         trendsChart.update();
-
-        // Note: Notifications and Export modal will be handled separately
+    }
+    
+    // --- OFFICE FILTER POPULATION ---
+    async function populateOfficeFilter() {
+        try {
+            const response = await fetch('api/offices.php');
+            const result = await response.json();
+            if (!result.success) throw new Error(result.message);
+            const officeSelect = document.getElementById('export-office');
+            officeSelect.innerHTML = '<option value="all">All Offices</option>'; 
+            result.data.forEach(office => {
+                const option = document.createElement('option');
+                option.value = office.id;
+                option.textContent = office.name;
+                officeSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Failed to populate office filter:', error);
+        }
     }
 
-    // --- EVENT LISTENERS ---
     function setupEventListeners() {
         // --- Date and Preset Filter Listeners ---
         presetFiltersContainer.addEventListener('click', e => {
@@ -151,7 +252,8 @@ document.addEventListener('DOMContentLoaded', () => {
             notificationDropdown.addEventListener('click', e => e.stopPropagation());
         }
         if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', markAllAsRead); // Assumes markAllAsRead function exists
+            // Note: need to create a function named markAllAsRead for this to work
+            // markAllReadBtn.addEventListener('click', markAllAsRead); 
         }
 
         // --- Feedback Details Modal (for notifications) ---
@@ -171,17 +273,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (openExportModalBtn) {
             openExportModalBtn.addEventListener('click', () => {
                 exportModal.classList.remove('hidden');
-                // initializeExportModal(); // Assumes this function exists to set dates
+                // Note: May need a function to initialize dates here
+                // initializeExportModal(); 
             });
         }
         if (closeExportModalBtn) closeExportModalBtn.addEventListener('click', () => exportModal.classList.add('hidden'));
         if (cancelExportBtn) cancelExportBtn.addEventListener('click', () => exportModal.classList.add('hidden'));
-        // if (exportForm) exportForm.addEventListener('submit', handleExportSubmit); // Assumes this function exists
-    }
+        if (exportForm) {
+            // Note: Need to create a function to handle the export
+            // exportForm.addEventListener('submit', handleExportSubmit);
+        }
+}
 
     // --- INITIAL LOAD ---
     initializeCharts();
     setupEventListeners();
-    populateOfficeFilter(); // The function we created to populate the export modal
-    document.querySelector('.filter-btn[data-period="this_week"]').click(); // Click the default filter to trigger the first data load
+    populateOfficeFilter();
+    document.querySelector('.filter-btn[data-period="this_week"]').click();
 });
