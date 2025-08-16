@@ -24,7 +24,7 @@ $user = $_SESSION['user_data'];
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/output.css" rel="stylesheet">  
-    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body class="bg-gray-50 font-sans">
@@ -46,14 +46,14 @@ $user = $_SESSION['user_data'];
             <nav class="flex-1 p-4 overflow-y-auto">
                 <ul class="space-y-2">
                     <li>
-                        <a href="dashboard.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
+                        <a href="dashboard.php" class="flex items-center px-3 py-3 bg-blue-50 text-jru-blue rounded-lg font-medium">
                             <i class="fas fa-tachometer-alt text-lg w-6"></i>
                             <span class="menu-text ml-3">Dashboard</span>
                         </a>
                     </li>
                     <li>
-                        <a href="survey-management.php" class="flex items-center px-3 py-3 bg-blue-50 text-jru-blue rounded-lg font-medium"> 
-                            <i class="fas fa-poll text-lg w-6"></i>
+                        <a href="survey-management.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors"> 
+                            <i class="fas fa-tachometer-alt text-lg w-6"></i>
                             <span class="menu-text ml-3">Survey Management</span>
                         </a>
                     </li>
@@ -79,7 +79,7 @@ $user = $_SESSION['user_data'];
                 </ul>
                 <br>
                 
-                <!-- Quick Actions -->
+                <!-- Quick Actions 
                 <div class="mt-8">
                     <div id="quickActionsHeader" class="menu-text text-xs font-semibold text-gray-50 uppercase tracking-wider mb-3">
                         Quick Actions
@@ -94,23 +94,37 @@ $user = $_SESSION['user_data'];
                             <span class="menu-text ml-3">Export Data</span>
                         </button>
                     </div>
-                </div>
+                </div> -->
             </nav>
             
             <!-- User Profile -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-r from-jru-gold to-yellow-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-white text-sm"></i>
-                    </div>
-                    <div id="userInfo" class="menu-text ml-3 flex-1">
-                        <!-- You can use the session data you already have here -->
-                        <p class="text-sm font-medium text-gray-50"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
-                        <p class="text-xs text-gray-100"><?php echo htmlspecialchars($user['email']); ?></p>
-                    </div>
-                    <!-- You can add a logout button/link here -->
-                </div>
-            </div>
+            <div class="p-4 border-t border-gray-200 relative">
+
+    <!-- The Pop-out Menu (Initially Hidden) -->
+    <div id="userMenu" class="absolute bottom-full left-0 w-full p-2 hidden">
+        <div class="bg-gray-700 rounded-lg shadow-lg">
+            <a href="logout.php" class="flex items-center w-full px-3 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-lg">
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span class="menu-text ml-3">Logout</span>
+            </a>
+            <!-- You can add other links like "Settings" here in the future -->
+        </div>
+    </div>
+
+    <!-- The Clickable User Profile Area -->
+    <button id="userMenuBtn" class="w-full flex items-center text-left hover:bg-gray-700 p-2 rounded-lg">
+        <div class="w-10 h-10 bg-gradient-to-r from-jru-gold to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user text-white text-sm"></i>
+        </div>
+        <div id="userInfo" class="menu-text ml-3 flex-1 overflow-hidden">
+            <p class="text-sm font-medium text-gray-50 truncate"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
+            <p class="text-xs text-gray-100 truncate"><?php echo htmlspecialchars($user['email']); ?></p>
+        </div>
+        <div class="menu-text ml-2">
+            <i class="fas fa-ellipsis-v text-gray-400"></i>
+        </div>
+    </button>
+</div>
         </div>
 
         
@@ -177,12 +191,15 @@ $user = $_SESSION['user_data'];
                         <div class="flex items-center justify-between mb-3"><div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"><i class="fas fa-users text-purple-600 text-lg"></i></div></div>
                         <div><p class="text-sm font-medium text-gray-600 mb-1">Feedback Freq. (Daily Avg)</p><p id="feedback-frequency" class="text-2xl font-bold text-gray-900">...</p></div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-3">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col">
+                        <div class="flex items-center justify-between mb-2">
                             <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center"><i class="fas fa-star text-jru-gold text-lg"></i></div>
                             <p id="rating-dist-total" class="text-xs text-gray-500">... total</p>
                         </div>
-                        <div><p class="text-sm font-medium text-gray-600 mb-2">Rating Distribution</p><div id="rating-distribution-bars" class="space-y-1"></div></div>
+                        <p class="text-sm font-medium text-gray-600 mb-2">Rating Distribution</p>
+                        <div class="flex-grow" style="position: relative; height: 120px;"> <!-- Chart container -->
+                            <canvas id="ratingDistChart"></canvas>
+                        </div>
                     </div>
                 </div>
                 <!-- Charts and Data Sections -->
@@ -268,9 +285,7 @@ $user = $_SESSION['user_data'];
                         <label for="export-office" class="block text-sm font-medium text-gray-700">Filter by Office</label>
                         <select id="export-office" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-jru-blue focus:border-jru-blue sm:text-sm">
                             <option value="all">All Offices</option>
-                            <?php foreach ($offices as $office_name): ?>
-                                <option value="<?php echo htmlspecialchars($office_name); ?>"><?php echo htmlspecialchars($office_name); ?></option>
-                            <?php endforeach; ?>
+                            <!-- Options will be populated by JavaScript -->
                         </select>
                     </div>
                     <div>
