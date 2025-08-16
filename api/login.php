@@ -15,7 +15,8 @@ if (empty($email) || empty($password)) {
 }
 
 try {
-    $db = (new Database()->getConnection());
+    $database = new Database();
+    $db = $database->getConnection();
 
     $stmt = $db->prepare("SELECT * FROM users WHERE email = :email");
     $stmt->execute([':email' => $email]);
