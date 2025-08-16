@@ -26,92 +26,123 @@ $period = $_GET['period'] ?? 'this_week';
 $startDate = $_GET['startDate'] ?? null;
 $endDate = $_GET['endDate'] ?? null;
 
+// This block now ONLY sets the string dates if a preset is used.
 if (!$startDate || !$endDate) {
-    $end_dt = new DateTime();
+    $end_dt_preset = new DateTime();
     switch ($period) {
         case 'this_month':
-            $start_dt = new DateTime('first day of this month');
+            $start_dt_preset = new DateTime('first day of this month');
             break;
         case 'this_quarter':
-            $month = $end_dt->format('n');
+            $month = $end_dt_preset->format('n');
             $quarter = ceil($month / 3);
             $start_month = ($quarter - 1) * 3 + 1;
-            $start_dt = new DateTime(date('Y') . "-$start_month-01");
+            $start_dt_preset = new DateTime(date('Y') . "-$start_month-01");
             break;
         case 'this_year':
-            $start_dt = new DateTime('first day of January this year');
+            $start_dt_preset = new DateTime('first day of January this year');
             break;
         case 'all_time':
-            $start_dt = new DateTime('2020-01-01'); // A reasonable "all time" start
+            $start_dt_preset = new DateTime('2020-01-01'); // A reasonable "all time" start
             break;
         case 'this_week':
         default:
-            $start_dt = new DateTime('monday this week');
+            $start_dt_preset = new DateTime('monday this week');
             break;
     }
-    $startDate = $start_dt->format('Y-m-d');
-    $endDate = $end_dt->format('Y-m-d');
+    // Set the string dates from the objects we just created
+    $startDate = $start_dt_preset->format('Y-m-d');
+    $endDate = $end_dt_preset->format('Y-m-d');
 }
+
+// $startDate and $endDate are guaranteed to be valid date strings.
 $endDatePlusOne = (new DateTime($endDate))->modify('+1 day')->format('Y-m-d');
-$dateFilterClause = "WHERE sr.submitted_at BETWEEN :startDate AND :endDatePlusOne";
+$dateFilterClause = "sr.submitted_at BETWEEN :startDate AND :endDatePlusOne";
 $params = [':startDate' => $startDate, ':endDatePlusOne' => $endDatePlusOne];
 
+
+// Use DateTime objects for accurate comparison and add one day to the end date for BETWEEN clause
+$endDatePlusOne = (new DateTime($endDate))->modify('+1 day')->format('Y-m-d');
+$dateFilterClause = "sr.submitted_at BETWEEN :startDate AND :endDatePlusOne";
+$params = [':startDate' => $startDate, ':endDatePlusOne' => $endDatePlusOne];
 
 // --- 2. Data Calculation ---
 $data = [];
 
 try {
-    // Metric 1: Total Responses
-    $stmt = $db->prepare("SELECT COUNT(id) as total FROM survey_responses sr $dateFilterClause");
+    // Step 1: Fetch raw JSON data with a simpler query
+    $query = "
+        SELECT 
+            sr.answers_json,
+            s.questions_json,
+            sr.submitted_at
+        FROM survey_responses sr
+        JOIN surveys s ON sr.survey_id = s.id
+        WHERE {$dateFilterClause}
+    ";
+    
+    $stmt = $db->prepare($query);
     $stmt->execute($params);
-    $data['total_responses'] = (int) $stmt->fetchColumn();
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Initialize all metrics to avoid errors if there are no responses
+    // Initialize all metrics
+    $data['total_responses'] = count($results);
     $data['overall_satisfaction'] = 0;
-    $data['rating_distribution'] = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+    $data['rating_distribution'] = array_fill_keys([5, 4, 3, 2, 1], 0);
     $data['service_performance'] = [];
     $data['trends_labels'] = [];
     $data['trends_data'] = [];
+    
+    $allRatings = []; // This will hold our processed ratings
 
     if ($data['total_responses'] > 0) {
-        // --- This is the advanced query to extract all numeric ratings from the JSON ---
-        $query = "
-            WITH AllRatings AS (
-                SELECT 
-                    CAST(JSON_UNQUOTE(JSON_EXTRACT(jt.answer_obj, '$.answer')) AS SIGNED) as rating,
-                    JSON_UNQUOTE(JSON_EXTRACT(q.question_obj, '$.title')) as question_title,
-                    DATE(sr.submitted_at) as submission_date
-                FROM survey_responses sr
-                JOIN surveys s ON sr.survey_id = s.id,
-                     JSON_TABLE(sr.answers_json, '$[*]' COLUMNS (
-                        question_id INT PATH '$.question_id',
-                        answer_obj JSON PATH '$'
-                     )) AS jt,
-                     JSON_TABLE(s.questions_json, '$[*]' COLUMNS (
-                        id INT PATH '$.id',
-                        type VARCHAR(20) PATH '$.type',
-                        question_obj JSON PATH '$'
-                     )) AS q
-                WHERE jt.question_id = q.id AND q.type IN ('likert', 'rating') AND $dateFilterClause
-            )
-            SELECT * FROM AllRatings;
-        ";
+        // Step 2: Process the JSON data in PHP
+        foreach ($results as $row) {
+            $questions = json_decode($row['questions_json'], true);
+            $answers = json_decode($row['answers_json'], true);
+            
+            // Create a quick lookup map of question types and titles by ID
+            $questionMap = [];
+            foreach ($questions as $q) {
+                if (isset($q['id'])) {
+                    $questionMap[$q['id']] = [
+                        'type' => $q['type'] ?? 'unknown',
+                        'title' => $q['title'] ?? 'Untitled Question'
+                    ];
+                }
+            }
+            
+            // Iterate through answers and extract only the ratings from likert/rating types
+            foreach ($answers as $ans) {
+                $q_id = $ans['question_id'];
+                if (isset($questionMap[$q_id])) {
+                    $questionInfo = $questionMap[$q_id];
+                    if ($questionInfo['type'] === 'likert' || $questionInfo['type'] === 'rating') {
+                        // Sanitize answer to ensure it's a numeric value
+                        $ratingValue = filter_var($ans['answer'], FILTER_VALIDATE_INT);
+                        if ($ratingValue !== false && $ratingValue >= 1 && $ratingValue <= 5) {
+                            $allRatings[] = [
+                                'rating' => $ratingValue,
+                                'question_title' => $questionInfo['title'],
+                                'submission_date' => (new DateTime($row['submitted_at']))->format('Y-m-d')
+                            ];
+                        }
+                    }
+                }
+            }
+        }
         
-        // We need to re-bind params since we can't use named params inside JSON_TABLE in some versions
-        $stmt = $db->prepare(str_replace(array_keys($params), '?', $query));
-        $stmt->execute(array_values($params));
-        $allRatings = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
+        // Step 3: Aggregate metrics from the processed data
         if (!empty($allRatings)) {
-            // Metric 2: Overall Satisfaction
+            // Metric 1: Overall Satisfaction
             $totalScore = 0;
             foreach ($allRatings as $row) { $totalScore += $row['rating']; }
             $data['overall_satisfaction'] = round($totalScore / count($allRatings), 1);
 
-            // Metric 3: Rating Distribution
+            // Metric 2: Rating Distribution
             foreach ($allRatings as $row) { $data['rating_distribution'][$row['rating']]++; }
 
-            // Metric 4: Service Performance
+            // Metric 3: Service Performance
             $performance = [];
             foreach ($allRatings as $row) {
                 if (!isset($performance[$row['question_title']])) {
@@ -127,7 +158,7 @@ try {
                 ];
             }
 
-            // Metric 5: Satisfaction Trends
+            // Metric 4: Satisfaction Trends
             $trends = [];
             foreach ($allRatings as $row) {
                 $date = $row['submission_date'];
@@ -144,7 +175,7 @@ try {
             }
         }
     }
-
+    
     // Pass back the date range for the UI
     $data['startDate'] = $startDate;
     $data['endDate'] = $endDate;
@@ -153,5 +184,8 @@ try {
 
 } catch (PDOException $e) {
     respond(false, "API Error: " . $e->getMessage(), null, 500);
+} catch (Exception $e) {
+    respond(false, "An unexpected error occurred: " . $e->getMessage(), null, 500);
 }
+
 ?>
