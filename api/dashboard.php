@@ -1,6 +1,4 @@
 <?php
-// --- api/dashboard.php ---
-
 session_start();
 header('Content-Type: application/json');
 

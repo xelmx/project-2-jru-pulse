@@ -79,10 +79,10 @@
     <!-- User Profile  -->
     <div class="p-4 border-t border-gray-200 relative">
         <div id="userMenu" class="absolute bottom-full mb-2 left-0 right-0 p-2 hidden">
-            <div class="bg-gray-700 rounded-lg shadow-xl">
+            <div class="bg-jru-gold rounded-lg shadow-xl">
                 <a href="includes/logout.php" id="logoutBtn" class="flex items-center w-full px-3 py-3 text-sm text-red-400 hover:bg-red-900 hover:text-white rounded-lg transition-colors">
                     <i class="fas fa-sign-out-alt w-6"></i>
-                    <span class="menu-text ml-3">Logout</span>
+                    <span class="menu-text ml-2">Logout</span>
                 </a>
             </div>
         </div>

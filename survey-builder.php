@@ -338,7 +338,7 @@ $currentPage = 'survey-management';
         </div>
     </div>
 </div>
-     <script src="js/admin-main.js"></script>
+     <script src="js/main.js"></script>
     <script src="js/survey-builder.js">  </script>
 </body>
 </html>

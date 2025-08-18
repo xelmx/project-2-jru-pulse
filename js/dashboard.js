@@ -6,27 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let trendsChart;
     let ratingDistChart; // Chart for Rating Distribution
 
-    const userMenuBtn = document.getElementById('userMenuBtn');
-    const userMenu = document.getElementById('userMenu');
-
-    if (userMenuBtn && userMenu) {
-        // Listen for a click on the button
-        userMenuBtn.addEventListener('click', (event) => {
-            // Stop the click from immediately being caught by the document listener below
-            event.stopPropagation(); 
-            // Toggle the 'hidden' class to show/hide the menu
-            userMenu.classList.toggle('hidden');
-        });
-
-        // Listen for a click anywhere on the page
-        document.addEventListener('click', () => {
-            // If the menu is visible, hide it
-            if (!userMenu.classList.contains('hidden')) {
-                userMenu.classList.add('hidden');
-            }
-        });
-    }
-
+  
     // --- CHART INITIALIZATION 
     function initializeCharts() {
         // Trends Chart 
@@ -97,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- UI UPDATING  ---
     function updateUI(data) {
         // Update date inputs
         startDateInput.value = data.startDate;
@@ -262,23 +241,3 @@ document.addEventListener('DOMContentLoaded', () => {
     populateOfficeFilter();
     document.querySelector('.filter-btn[data-period="this_week"]').click();
 });
-
-    const logoutBtn = document.getElementById('logoutBtn');
-    const logoutConfirmationModal = document.getElementById('logoutConfirmationModal');
-    const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
-    const cancelLogoutBtn = document.getElementById('cancelLogoutBtn');
-
-    if (logoutBtn && logoutConfirmationModal) {
-        logoutBtn.addEventListener('click', (event) => {
-            event.preventDefault(); 
-            logoutConfirmationModal.classList.remove('hidden');
-        });
-
-        cancelLogoutBtn.addEventListener('click', () => {
-            logoutConfirmationModal.classList.add('hidden');
-        });
-
-        confirmLogoutBtn.addEventListener('click', () => {
-            window.location.href = 'logout.php';
-        });
-    }
