@@ -15,7 +15,6 @@
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +23,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> <!--Font Awesome for icons-->
     <link href="css/output.css" rel="stylesheet">  <!--Tailwind CSS for styling-->
-    <link rel="stylesheet" href="css/admin-main.css"> <!-- Custom styles for admin -->
+    <link rel="stylesheet" href="css/main.css"> <!-- Custom styles for admin -->
 </head>
 
 <body class="bg-gray-50 font-sans">
@@ -32,6 +31,8 @@
           <?php
             $currentPage = 'dashboard'; 
             require_once 'includes/sidebar.php';
+
+            require_once 'includes/logout.php'; // Include the logout confirmation modal
         ?>
         
         <!-- Main Content -->
@@ -220,40 +221,6 @@
                     <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-jru-blue hover:bg-jru-navy">Export Data</button>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <div id="logoutConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
-            <div class="p-6">
-                <div class="flex items-start">
-                    <!-- Icon -->
-                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                    </div>
-                    <div class="ml-4 text-left">
-                        <!-- Title -->
-                        <h3 class="text-lg leading-6 font-bold text-gray-900">
-                            Confirm Logout
-                        </h3>
-                        <!-- Message Body -->
-                        <div class="mt-2">
-                            <p class="text-sm text-gray-600">
-                                Are you sure you want to log out of your session?
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Action Buttons -->
-            <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-4 rounded-b-xl">
-                <button id="cancelLogoutBtn" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                    Cancel
-                </button>
-                <button id="confirmLogoutBtn" type="button" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
-                    Logout
-                </button>
-            </div>
         </div>
     </div>
 

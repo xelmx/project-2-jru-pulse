@@ -25,7 +25,7 @@ $user = $_SESSION['user_data'];
 </head>
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
-        <!-- Sidebar (Copied from survey-management.php for consistency) -->
+       
        <div id="sidebar" class="sidebar-transition sidebar-expanded bg-blue-950 shadow-lg flex flex-col border-r border-gray-200">
              <!-- Logo Section -->
             <div class="p-4 border-b border-gray-200">

@@ -12,10 +12,6 @@
     width: 5rem; /* 80px */
 }
 
-/*
- * THE FIX IS HERE: These rules hide the text and logo when the sidebar collapses.
- * We use opacity and visibility for a smooth fading effect.
-*/
 .sidebar-collapsed .menu-text,
 .sidebar-collapsed #logoContainer {
     opacity: 0;
@@ -23,7 +19,7 @@
     transition: opacity 150ms ease-out, visibility 0s 150ms;
 }
 
-/* These rules make the text and logo reappear smoothly when the sidebar expands. */
+/* Make the text and logo reappear smoothly when the sidebar expands. */
 .sidebar-expanded .menu-text,
 .sidebar-expanded #logoContainer {
     opacity: 1;

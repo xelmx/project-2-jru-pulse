@@ -28,11 +28,8 @@ if ($error === 'unauthorized') {
     <title>JRU PULSE Login</title>
     <link href="css/output.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-   
-    <style>
-      
-    </style>
 </head>
+
 <body class="min-h-screen bg-gray-100 bg-[url('assets/JRU-PULSE-bg.svg')] bg-left-top bg-no-repeat bg-fixed bg-[length:auto_100vh] overflow-hidden relative">
     <div class="relative z-10 min-h-screen flex items-center px-4 sm:px-8 md:px-12 lg:px-16">
         <div class="flex-shrink-0 w-3/6"></div>

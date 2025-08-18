@@ -1,15 +1,17 @@
 <?php
-session_start(); //the very first thing on the page
+session_start(); // Must be the very first line
 
-//Check if user is logged in and is an admin
+// 1. Gatekeeper: Ensure the user is a logged-in admin
 if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
-    
-    // If not logged in or not an admin, redirect to the login page
     header('Location: index.php?error=auth_required');
     exit;
 }
 
+// This makes the user's data available for the sidebar's profile section
 $user = $_SESSION['user_data'];
+
+//  Set the active page to 'survey-management' tells the sidebar to highlight the "Survey Management" link.
+$currentPage = 'survey-management';
 
 ?>
 
@@ -21,15 +23,16 @@ $user = $_SESSION['user_data'];
     <title>JRU-PULSE - Survey Builder</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
      <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <link rel="stylesheet" href="css/admin-main.css">
+    <link rel="stylesheet" href="css/main.css">
     <link href="css/output.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <?php
-            $currentPage = 'survey-builder'; // Set the current page for active link highlighting
             require_once 'includes/sidebar.php';
+
+            require_once 'includes/logout.php'; // Include the logout confirmation modal
         ?>
         
         <!-- Main Content -->
@@ -335,7 +338,7 @@ $user = $_SESSION['user_data'];
         </div>
     </div>
 </div>
-
+     <script src="js/admin-main.js"></script>
     <script src="js/survey-builder.js">  </script>
 </body>
 </html>

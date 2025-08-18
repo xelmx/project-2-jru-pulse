@@ -20,7 +20,7 @@ $user = $_SESSION['user_data'];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JRU-PULSE - Survey Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/admin-main.css">
+    <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/output.css">
 </head>
 <style>
@@ -32,6 +32,7 @@ $user = $_SESSION['user_data'];
     <?php
         $currentPage = 'survey-management'; // Set the current page for active link highlighting
         require_once 'includes/sidebar.php';
+        require_once 'includes/logout.php'; // Include the logout confirmation modal
     ?>
         
         <!-- Main Content -->
