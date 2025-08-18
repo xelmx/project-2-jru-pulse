@@ -26,7 +26,7 @@ try {
 
     if ($user && password_verify($password, $user['password_hash'])) {
 
-        //PW is correct, Log in the user in.  //Don't store the PW hash in the session.
+        //PW is correct, Log in the user in.  Don't store the PW hash in the session.
         $_SESSION['user_data'] = [
             'id' => $user['id'],
             'first_name' => $user['first_name'],

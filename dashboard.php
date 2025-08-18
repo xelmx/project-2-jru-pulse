@@ -1,15 +1,15 @@
 <?php
-session_start(); //the very first thing on the page
+    session_start(); //the very first thing on the page
 
-//Check if user is logged in and is an admin
-if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
-    
-    // If not logged in or not an admin, redirect to the login page
-    header('Location: index.php?error=auth_required');
-    exit;
-}
+    //Check if user is logged in and is an admin
+    if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
+        
+        // If not logged in or not an admin, redirect to the login page
+        header('Location: index.php?error=auth_required');
+        exit;
+    }
 
-$user = $_SESSION['user_data'];
+    $user = $_SESSION['user_data'];
 
 ?>
 
@@ -22,111 +22,17 @@ $user = $_SESSION['user_data'];
     <title>JRU-PULSE Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="css/output.css" rel="stylesheet">  
-    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> <!--Font Awesome for icons-->
+    <link href="css/output.css" rel="stylesheet">  <!--Tailwind CSS for styling-->
+    <link rel="stylesheet" href="css/admin-main.css"> <!-- Custom styles for admin -->
 </head>
 
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
-      <div id="sidebar" class="sidebar-transition sidebar-expanded bg-blue-950 shadow-lg flex flex-col border-r border-gray-200">
-            <!-- Logo Section -->
-            <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center">
-                    <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-600 transition-colors mr-3">
-                        <i class="fas fa-bars text-gray-100"></i>
-                    </button>
-                    <div id="logoContainer" class="logo-transition flex items-center">
-                        <img src="assets/jru-pulse-final-white.png" alt="JRU-PULSE" class="h-8 w-auto">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 overflow-y-auto">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="dashboard.php" class="flex items-center px-3 py-3 bg-blue-50 text-jru-blue rounded-lg font-medium">
-                            <i class="fas fa-tachometer-alt text-lg w-6"></i>
-                            <span class="menu-text ml-3">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="survey-management.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors"> 
-                            <i class="fas fa-tachometer-alt text-lg w-6"></i>
-                            <span class="menu-text ml-3">Survey Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="performance-analytics-reports.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-chart-line text-lg w-6"></i>
-                            <span class="menu-text ml-3">Performance Analytics & Reports</span>
-                        </a>
-                    </li>
-                   
-                    <li>
-                        <a href="#" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-users text-lg w-6"></i>
-                            <span class="menu-text ml-3">User Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-cog text-lg w-6"></i>
-                            <span class="menu-text ml-3">Settings</span>
-                        </a>
-                    </li>
-                </ul>
-                <br>
-                
-                <!-- Quick Actions 
-                <div class="mt-8">
-                    <div id="quickActionsHeader" class="menu-text text-xs font-semibold text-gray-50 uppercase tracking-wider mb-3">
-                        Quick Actions
-                    </div>
-                    <div class="space-y-2">
-                        <button id="quickNewSurvey" class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-plus text-sm w-6"></i>
-                            <span class="menu-text ml-3">New Survey</span>
-                        </button>
-                        <button class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-download text-sm w-6"></i>
-                            <span class="menu-text ml-3">Export Data</span>
-                        </button>
-                    </div>
-                </div> -->
-            </nav>
-            
-            <!-- User Profile -->
-            <div class="p-4 border-t border-gray-200 relative">
-
-    <!-- The Pop-out Menu (Initially Hidden) -->
-    <div id="userMenu" class="absolute bottom-full left-0 w-full p-2 hidden">
-        <div class="bg-gray-700 rounded-lg shadow-lg">
-            <a href="logout.php" class="flex items-center w-full px-3 py-2 text-sm text-red-400 hover:bg-gray-600 rounded-lg">
-                <i class="fas fa-sign-out-alt w-6"></i>
-                <span class="menu-text ml-3">Logout</span>
-            </a>
-            <!-- You can add other links like "Settings" here in the future -->
-        </div>
-    </div>
-
-    <!-- The Clickable User Profile Area -->
-    <button id="userMenuBtn" class="w-full flex items-center text-left hover:bg-gray-700 p-2 rounded-lg">
-        <div class="w-10 h-10 bg-gradient-to-r from-jru-gold to-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
-            <i class="fas fa-user text-white text-sm"></i>
-        </div>
-        <div id="userInfo" class="menu-text ml-3 flex-1 overflow-hidden">
-            <p class="text-sm font-medium text-gray-50 truncate"><?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?></p>
-            <p class="text-xs text-gray-100 truncate"><?php echo htmlspecialchars($user['email']); ?></p>
-        </div>
-        <div class="menu-text ml-2">
-            <i class="fas fa-ellipsis-v text-gray-400"></i>
-        </div>
-    </button>
-</div>
-        </div>
-
+          <?php
+            $currentPage = 'dashboard'; 
+            require_once 'includes/sidebar.php';
+        ?>
         
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -137,11 +43,13 @@ $user = $_SESSION['user_data'];
                         <p class="text-sm text-gray-600 mt-1">Performance and User-satisfaction Linked Services Evaluation</p>
                     </div>
                     <div class="flex items-center space-x-4">
+                        
                         <div class="relative" id="notification-bell-container">
                             <button id="notification-bell" class="relative p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-colors">
                                 <i class="fas fa-bell text-xl"></i>
                                 <span id="notification-count" class="hidden absolute -top-1 -right-1 w-5 h-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center"></span>
                             </button>
+                            
                             <div id="notification-dropdown" class="absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-20">
                                 <div class="p-3 border-b flex justify-between items-center">
                                     <span class="font-semibold text-gray-800">Notifications</span>
@@ -314,6 +222,42 @@ $user = $_SESSION['user_data'];
             </form>
         </div>
     </div>
+
+    <div id="logoutConfirmationModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-start">
+                    <!-- Icon -->
+                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <!-- Title -->
+                        <h3 class="text-lg leading-6 font-bold text-gray-900">
+                            Confirm Logout
+                        </h3>
+                        <!-- Message Body -->
+                        <div class="mt-2">
+                            <p class="text-sm text-gray-600">
+                                Are you sure you want to log out of your session?
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Action Buttons -->
+            <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-4 rounded-b-xl">
+                <button id="cancelLogoutBtn" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Cancel
+                </button>
+                <button id="confirmLogoutBtn" type="button" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
+                    Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
     <script src="js/dashboard.js"></script>
 </body>
 

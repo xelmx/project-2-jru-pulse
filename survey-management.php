@@ -18,9 +18,9 @@ $user = $_SESSION['user_data'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Survey Management - JRU-A-PULSE</title>
+    <title>JRU-PULSE - Survey Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/admin-main.css">
     <link rel="stylesheet" href="css/output.css">
 </head>
 <style>
@@ -29,90 +29,10 @@ $user = $_SESSION['user_data'];
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-       <div id="sidebar" class="sidebar-transition sidebar-expanded bg-blue-950 shadow-lg flex flex-col border-r border-gray-200">
-            <!-- Logo Section -->
-            <div class="p-4 border-b border-gray-200">
-                <div class="flex items-center">
-                    <button id="sidebarToggle" class="p-2 rounded-lg hover:bg-gray-600 transition-colors mr-3">
-                        <i class="fas fa-bars text-gray-100"></i>
-                    </button>
-                    <div id="logoContainer" class="logo-transition flex items-center">
-                        <img src="assets\jru-pulse-final-white.png" alt="JRU-A-PULSE" class="h-8 w-auto">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navigation -->
-            <nav class="flex-1 p-4 overflow-y-auto">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="dashboard.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-tachometer-alt text-lg w-6"></i>
-                            <span class="menu-text ml-3">Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="survey-management.php" class="flex items-center px-3 py-3 bg-blue-50 text-jru-blue rounded-lg font-medium"> 
-                            <i class="fas fa-poll text-lg w-6"></i>
-                            <span class="menu-text ml-3">Survey Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="performance-analytics-reports.php" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-chart-line text-lg w-6"></i>
-                            <span class="menu-text ml-3">Performance Analytics & Reports</span>
-                        </a>
-                    </li>
-                   
-                    <li>
-                        <a href="#" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-users text-lg w-6"></i>
-                            <span class="menu-text ml-3">User Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center px-3 py-3 text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-cog text-lg w-6"></i>
-                            <span class="menu-text ml-3">Settings</span>
-                        </a>
-                    </li>
-                </ul>
-                <br>
-                
-                <!-- Quick Actions -->
-                <div class="mt-8">
-                    <div id="quickActionsHeader" class="menu-text text-xs font-semibold text-gray-50 uppercase tracking-wider mb-3">
-                        Quick Actions
-                    </div>
-                    <div class="space-y-2">
-                        <button id="quickNewSurvey" class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-plus text-sm w-6"></i>
-                            <span class="menu-text ml-3">New Survey</span>
-                        </button>
-                        <button class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                            <i class="fas fa-download text-sm w-6"></i>
-                            <span class="menu-text ml-3">Export Data</span>
-                        </button>
-                    </div>
-                </div>
-            </nav>
-            
-            <!-- User Profile -->
-            <div class="p-4 border-t border-gray-200">
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-gradient-to-r from-jru-gold to-yellow-600 rounded-full flex items-center justify-center">
-                        <i class="fas fa-user text-white text-sm"></i>
-                    </div>
-                    <div id="userInfo" class="menu-text ml-3 flex-1">
-                        <p class="text-sm font-medium text-gray-50">Administrator</p>
-                        <p class="text-xs text-gray-100">gto@jru.edu.ph</p>
-                    </div>
-                    <button class="menu-text p-2 text-gray-50 hover:text-yellow-400 transition-colors">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
+    <?php
+        $currentPage = 'survey-management'; // Set the current page for active link highlighting
+        require_once 'includes/sidebar.php';
+    ?>
         
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
@@ -603,6 +523,7 @@ $user = $_SESSION['user_data'];
     </div>
      <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
+     <script src="js/main.js"> </script>
     <script src="js/survey-management.js"> </script>
 </body>
 </html>

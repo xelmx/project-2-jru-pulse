@@ -6,57 +6,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let trendsChart;
     let ratingDistChart; // Chart for Rating Distribution
 
-    // --- SIDEBAR LOGIC (No Changes) ---
-   const sidebar = document.getElementById('sidebar');     // Sidebar toggle functionality
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const logoContainer = document.getElementById('logoContainer');
-    const menuTexts = document.querySelectorAll('.menu-text');
-    const userInfo = document.getElementById('userInfo');
-    const quickActionsHeader = document.getElementById('quickActionsHeader');
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userMenu = document.getElementById('userMenu');
 
-    let sidebarCollapsed = false;
-    let qrCodeObject = null;
+    if (userMenuBtn && userMenu) {
+        // Listen for a click on the button
+        userMenuBtn.addEventListener('click', (event) => {
+            // Stop the click from immediately being caught by the document listener below
+            event.stopPropagation(); 
+            // Toggle the 'hidden' class to show/hide the menu
+            userMenu.classList.toggle('hidden');
+        });
 
-    function toggleSidebar(){
-        sidebarCollapsed = !sidebarCollapsed;
-
-        if (sidebarCollapsed){
-            sidebar.classList.remove('sidebar-expanded');
-            sidebar.classList.add('sidebar-collapsed');
-
-            menuTexts.forEach(text => {  //Itago ang mga tekstual na elemento
-                text.style.opacity = '0';
-                setTimeout(() => {
-                    text.style.display = 'none';
-                }, 150);
-            });
-
-            logoContainer.style.opacity ='0'; 
-            setTimeout(() => {
-            logoContainer.style.display = 'none';
-            }, 150);
-
-        } else {
-            sidebar.classList.remove('sidebar-collapsed'); //Ipakita ang mga tekstual na elemento
-            sidebar.classList.add('sidebar-expanded');
-            
-            setTimeout(() => {
-                menuTexts.forEach(text => {
-                    text.style.display = 'block';
-                    setTimeout(() => {
-                        text.style.opacity = '1';
-                    }, 50);
-                });
-
-            logoContainer.style.display = 'flex';  //Ipakita ang logo
-            setTimeout(() => {
-                logoContainer.style.opacity = '1';
-            }, 50);
-        }, 150);
-        }
+        // Listen for a click anywhere on the page
+        document.addEventListener('click', () => {
+            // If the menu is visible, hide it
+            if (!userMenu.classList.contains('hidden')) {
+                userMenu.classList.add('hidden');
+            }
+        });
     }
-        
-    sidebarToggle.addEventListener('click', toggleSidebar); 
 
     // --- CHART INITIALIZATION 
     function initializeCharts() {
@@ -285,9 +254,31 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 }
 
+
+
     // --- INITIAL LOAD ---
     initializeCharts();
     setupEventListeners();
     populateOfficeFilter();
     document.querySelector('.filter-btn[data-period="this_week"]').click();
 });
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    const logoutConfirmationModal = document.getElementById('logoutConfirmationModal');
+    const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
+    const cancelLogoutBtn = document.getElementById('cancelLogoutBtn');
+
+    if (logoutBtn && logoutConfirmationModal) {
+        logoutBtn.addEventListener('click', (event) => {
+            event.preventDefault(); 
+            logoutConfirmationModal.classList.remove('hidden');
+        });
+
+        cancelLogoutBtn.addEventListener('click', () => {
+            logoutConfirmationModal.classList.add('hidden');
+        });
+
+        confirmLogoutBtn.addEventListener('click', () => {
+            window.location.href = 'logout.php';
+        });
+    }

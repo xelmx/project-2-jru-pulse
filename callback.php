@@ -4,12 +4,21 @@ session_start();
 require __DIR__ . '/vendor/autoload.php'; // 1. Load Composer's autoloader for Google's library
 require_once 'config/connection.php'; // 2. Load our standard database connection
 
-// --- Google OAuth Client Setup ---
-// In a real production app, these would be in a secure .env file.
-// For your capstone, you can define them here for simplicity.
-$CLIENT_ID = '913799866499-p05hvm7muoaiqogtp85d0s95jiuavfuv.apps.googleusercontent.com'; // <-- IMPORTANT: Replace with your actual Client ID
-$CLIENT_SECRET = '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';                   // <-- IMPORTANT: Replace with your actual Client Secret
-$REDIRECT_URI = 'http://localhost/p2-jru-pulse/jru-pulse/callback.php'; // <-- IMPORTANT: Must match your authorized URI in Google Cloud Console
+
+try {
+    // __DIR__ points to the directory of this file, which is the project root
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+} catch (Exception $e) {
+    // If the .env file is missing or unreadable, give a very clear error.
+    error_log("FATAL: Could not load .env file. Error: " . $e->getMessage());
+    die("FATAL ERROR: The application's configuration file (.env) is missing or could not be read. Please check the file exists in the root directory: " . __DIR__);
+}
+
+
+$CLIENT_ID = $_ENV['GOOGLE_CLIENT_ID'];
+$CLIENT_SECRET = $_ENV['GOOGLE_CLIENT_SECRET'];              
+$REDIRECT_URI = $_ENV['GOOGLE_REDIRECT_URI'];
 
 $client = new Google_Client();
 $client->setClientId($CLIENT_ID);

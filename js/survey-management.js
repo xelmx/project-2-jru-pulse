@@ -1,54 +1,3 @@
-    const sidebar = document.getElementById('sidebar');     // Sidebar toggle functionality
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const logoContainer = document.getElementById('logoContainer');
-    const menuTexts = document.querySelectorAll('.menu-text');
-    const userInfo = document.getElementById('userInfo');
-    const quickActionsHeader = document.getElementById('quickActionsHeader');
-
-    let sidebarCollapsed = false;
-    let qrCodeObject = null;
-
-    function toggleSidebar(){
-        sidebarCollapsed = !sidebarCollapsed;
-
-        if (sidebarCollapsed){
-            sidebar.classList.remove('sidebar-expanded');
-            sidebar.classList.add('sidebar-collapsed');
-
-            menuTexts.forEach(text => {  //Itago ang mga tekstual na elemento
-                text.style.opacity = '0';
-                setTimeout(() => {
-                    text.style.display = 'none';
-                }, 150);
-            });
-
-            logoContainer.style.opacity ='0'; 
-            setTimeout(() => {
-            logoContainer.style.display = 'none';
-            }, 150);
-
-        } else {
-            sidebar.classList.remove('sidebar-collapsed'); //Ipakita ang mga tekstual na elemento
-            sidebar.classList.add('sidebar-expanded');
-            
-            setTimeout(() => {
-                menuTexts.forEach(text => {
-                    text.style.display = 'block';
-                    setTimeout(() => {
-                        text.style.opacity = '1';
-                    }, 50);
-                });
-
-            logoContainer.style.display = 'flex';  //Ipakita ang logo
-            setTimeout(() => {
-                logoContainer.style.opacity = '1';
-            }, 50);
-        }, 150);
-        }
-    }
-        
-    sidebarToggle.addEventListener('click', toggleSidebar);  // Add the existing sidebar toggle event listener
-        
     let offices = []; //office global array
     let services = []; //services global array
     let isShowingArchivedOffices = false;
@@ -74,55 +23,58 @@
 
     
     function setupEventListeners() {
-        document.getElementById('surveysTab').addEventListener('click', () => switchTab('surveys'));
-        document.getElementById('officesTab').addEventListener('click', () => switchTab('offices'));
+        // Helper function to safely add event listeners
+        const addListener = (id, event, handler) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.addEventListener(event, handler);
+            } else {
+                console.warn(`Element with id '${id}' not found for event listener.`);
+            }
+        };
 
-        const newSurveyOffice = document.getElementById('newSurveyOffice');
-        if (newSurveyOffice) {
-            newSurveyOffice.addEventListener('change', handleOfficeChange);
-        }
+        // Tab Switching
+        addListener('surveysTab', 'click', () => switchTab('surveys'));
+        addListener('officesTab', 'click', () => switchTab('offices'));
 
-        document.getElementById('surveysTableBody').addEventListener('click', handleTableActions);
+        // Survey Actions & Modals
+        addListener('surveysTableBody', 'click', handleTableActions);
+        addListener('createSurveyBtn', 'click', openCreateSurveyModal);
+       // addListener('quickNewSurvey', 'click', openCreateSurveyModal); //for future use
+        addListener('closeCreateModal', 'click', closeCreateSurveyModal);
+        addListener('cancelCreate', 'click', closeCreateSurveyModal);
+        addListener('createSurveyForm', 'submit', handleCreateSurvey);
+        addListener('showArchivedSurveysToggle', 'change', function(event) {
+            isShowingArchivedSurveys = event.target.checked;
+            loadSurveys();
+        });
+        addListener('searchInput', 'input', renderSurveys);
 
-        document.getElementById('createSurveyBtn').addEventListener('click', openCreateSurveyModal);         // Create Survey Modal Listeners
-        document.getElementById('quickNewSurvey').addEventListener('click', openCreateSurveyModal);
-        document.getElementById('closeCreateModal').addEventListener('click', closeCreateSurveyModal);
-        document.getElementById('cancelCreate').addEventListener('click', closeCreateSurveyModal);
-        document.getElementById('createSurveyForm').addEventListener('submit', handleCreateSurvey);
+        //Office Actions & Modals
+        addListener('addOfficeBtn', 'click', openAddOfficeModal);
+        addListener('cancelAddOffice', 'click', closeAddOfficeModal);
+        addListener('addOfficeForm', 'submit', handleAddOffice);
+        addListener('editOfficeForm', 'submit', handleUpdateOffice);
+        addListener('cancelEditOfficeModal', 'click', closeEditOfficeModal);
+        addListener('showArchivedToggleOffices', 'change', handleShowArchivedToggleOffices);
+
+        // --- Service Actions & Modals ---
+        addListener('addServiceBtn', 'click', openAddServiceModal);
+        addListener('cancelAddService', 'click', closeAddServiceModal);
+        addListener('addServiceForm', 'submit', handleAddService);
+        addListener('editServiceForm', 'submit', handleUpdateService);
+        addListener('cancelEditServiceModal', 'click', closeEditServiceModal);
+        addListener('showArchivedToggleServices', 'change', handleShowArchivedServices);
+        addListener('officeFilter', 'change', loadServices); // Changed to loadServices for better filtering
+
+        // --- Share Modal ---
+        addListener('closeShareModal', 'click', closeShareModal);
+        addListener('doneShareBtn', 'click', closeShareModal);
+        addListener('copyLinkBtn', 'click', copyShareLink);
+        addListener('downloadQrBtn', 'click', downloadQrCode);
         
-        document.getElementById('addOfficeBtn').addEventListener('click', openAddOfficeModal);  // Event listeners for Office/Service CRUD, toggles, etc., are correct) ...
-        document.getElementById('cancelAddOffice').addEventListener('click', closeAddOfficeModal);
-        document.getElementById('addOfficeForm').addEventListener('submit', handleAddOffice);
-        document.getElementById('editOfficeForm').addEventListener('submit', handleUpdateOffice);
-        document.getElementById('cancelEditOfficeModal').addEventListener('click', closeEditOfficeModal);
-        
-        document.getElementById('addServiceBtn').addEventListener('click', openAddServiceModal);
-        document.getElementById('cancelAddService').addEventListener('click', closeAddServiceModal);
-        document.getElementById('addServiceForm').addEventListener('submit', handleAddService);
-        document.getElementById('editServiceForm').addEventListener('submit', handleUpdateService);
-        document.getElementById('cancelEditServiceModal').addEventListener('click', closeEditServiceModal);
-
-        document.getElementById('showArchivedToggleOffices').addEventListener('change', handleShowArchivedToggleOffices);
-        document.getElementById('showArchivedToggleServices').addEventListener('change', handleShowArchivedServices);
-        document.getElementById('officeFilter').addEventListener('change', filterServices);
-
-        document.getElementById('closeShareModal').addEventListener('click', closeShareModal);
-        document.getElementById('doneShareBtn').addEventListener('click', closeShareModal);
-        document.getElementById('copyLinkBtn').addEventListener('click', copyShareLink);
-        document.getElementById('downloadQrBtn').addEventListener('click', downloadQrCode);
-
-        const showArchivedToggleSurveys = document.getElementById('showArchivedSurveysToggle');
-        if (showArchivedToggleSurveys) {
-            showArchivedToggleSurveys.addEventListener('change', function(event) {
-                isShowingArchivedSurveys = event.target.checked;
-                loadSurveys();
-            });
-        }
-
-        const searchInput = document.getElementById('searchInput'); //
-        if (searchInput) {
-            searchInput.addEventListener('input', () => renderSurveys());
-        }
+        // --- Dynamic Select Dropdown ---
+        addListener('newSurveyOffice', 'change', handleOfficeChange);
     }
 
     function openCreateSurveyModal() {
@@ -1249,77 +1201,77 @@
         const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
         function showConfirmationModal({ title, message, actionText = 'Confirm' }) {
-        const confirmationModal = document.getElementById('confirmationModal');
-        const confirmTitle = document.getElementById('confirmationTitle');  // These get the elements from the modal's HTML
-        const confirmMessage = document.getElementById('confirmationMessage');
-        const confirmActionBtn = document.getElementById('confirmActionBtn');
-        const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+            const confirmationModal = document.getElementById('confirmationModal');
+            const confirmTitle = document.getElementById('confirmationTitle');  // These get the elements from the modal's HTML
+            const confirmMessage = document.getElementById('confirmationMessage');
+            const confirmActionBtn = document.getElementById('confirmActionBtn');
+            const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
-    
-        if (!confirmationModal) { // Safety check in case the HTML doesn't exist
-            if (window.confirm(`${title}\n\n${message}`)) { // If the modal HTML isn't on the page, fall back to the basic browser confirm
-                return Promise.resolve(); // User clicked "OK"
-            } else {
-                return Promise.reject();  // User clicked "Cancel"
-            }
-        }
-
-            return new Promise((resolve, reject) => {  // This returns a Promise, which lets us use 'await'
-                confirmTitle.textContent = title; // Set the text for this specific confirmation
-                confirmMessage.textContent = message;
-                confirmActionBtn.textContent = actionText;
-
-                confirmationModal.classList.remove('hidden'); // Show the modal
-
-                confirmActionBtn.onclick = () => {
-                    confirmationModal.classList.add('hidden'); // When the main action button is clicked, close the modal and resolve the promise (succeed)
-                    resolve();
-                };
-
-                confirmCancelBtn.onclick = () => {
-                    confirmationModal.classList.add('hidden'); // When the cancel button is clicked, close the modal and reject the promise (fail/cancel)
-                    reject(); 
-                };
-            });
-        }
-
-
-        let toastTimer; 
-
-        function showToastNotification(message, type = 'success') {
-            const toast = document.getElementById('toastNotification');
-            const toastIcon = document.getElementById('toastIcon');
-            const toastMessage = document.getElementById('toastMessage');
-
-            clearTimeout(toastTimer);
-           
-            toastMessage.textContent = message;
-            
-            if (type === 'success') {
-                toast.classList.remove('bg-red-500');
-                toast.classList.add('bg-green-500');
-                toastIcon.className = 'fas fa-check-circle mr-3 text-xl'; // Success icon
-            } else { // 'error'
-                toast.classList.remove('bg-green-500');
-                toast.classList.add('bg-red-500');
-                toastIcon.className = 'fas fa-exclamation-circle mr-3 text-xl'; // Error icon
+        
+            if (!confirmationModal) { // Safety check in case the HTML doesn't exist
+                if (window.confirm(`${title}\n\n${message}`)) { // If the modal HTML isn't on the page, fall back to the basic browser confirm
+                    return Promise.resolve(); // User clicked "OK"
+                } else {
+                    return Promise.reject();  // User clicked "Cancel"
+                }
             }
 
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.remove('opacity-0');
-            }, 10);
+                return new Promise((resolve, reject) => {  // This returns a Promise, which lets us use 'await'
+                    confirmTitle.textContent = title; // Set the text for this specific confirmation
+                    confirmMessage.textContent = message;
+                    confirmActionBtn.textContent = actionText;
 
-           
-            const duration = type === 'success' ? 3000 : 5000;
+                    confirmationModal.classList.remove('hidden'); // Show the modal
+
+                    confirmActionBtn.onclick = () => {
+                        confirmationModal.classList.add('hidden'); // When the main action button is clicked, close the modal and resolve the promise (succeed)
+                        resolve();
+                    };
+
+                    confirmCancelBtn.onclick = () => {
+                        confirmationModal.classList.add('hidden'); // When the cancel button is clicked, close the modal and reject the promise (fail/cancel)
+                        reject(); 
+                    };
+                });
+            }
+
+
+            let toastTimer; 
+
+            function showToastNotification(message, type = 'success') {
+                const toast = document.getElementById('toastNotification');
+                const toastIcon = document.getElementById('toastIcon');
+                const toastMessage = document.getElementById('toastMessage');
+
+                clearTimeout(toastTimer);
             
-            toastTimer = setTimeout(() => {
-                toast.classList.add('opacity-0');
+                toastMessage.textContent = message;
+                
+                if (type === 'success') {
+                    toast.classList.remove('bg-red-500');
+                    toast.classList.add('bg-green-500');
+                    toastIcon.className = 'fas fa-check-circle mr-3 text-xl'; // Success icon
+                } else { // 'error'
+                    toast.classList.remove('bg-green-500');
+                    toast.classList.add('bg-red-500');
+                    toastIcon.className = 'fas fa-exclamation-circle mr-3 text-xl'; // Error icon
+                }
+
+                toast.classList.remove('hidden');
                 setTimeout(() => {
-                    toast.classList.add('hidden');
-                }, 300);
-            }, duration);
-        }
+                    toast.classList.remove('opacity-0');
+                }, 10);
+
+            
+                const duration = type === 'success' ? 3000 : 5000;
+                
+                toastTimer = setTimeout(() => {
+                    toast.classList.add('opacity-0');
+                    setTimeout(() => {
+                        toast.classList.add('hidden');
+                    }, 300);
+                }, duration);
+            }
  
 
         function handleSearch() {

@@ -1,0 +1,115 @@
+
+.sidebar-transition {
+    /* Defines the smooth slide animation for the sidebar width */
+    transition: width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-expanded {
+    width: 16rem; /* 256px */
+}
+
+.sidebar-collapsed {
+    width: 5rem; /* 80px */
+}
+
+/*
+ * THE FIX IS HERE: These rules hide the text and logo when the sidebar collapses.
+ * We use opacity and visibility for a smooth fading effect.
+*/
+.sidebar-collapsed .menu-text,
+.sidebar-collapsed #logoContainer {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms ease-out, visibility 0s 150ms;
+}
+
+/* These rules make the text and logo reappear smoothly when the sidebar expands. */
+.sidebar-expanded .menu-text,
+.sidebar-expanded #logoContainer {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 300ms ease-in 100ms; /* Delay the fade-in slightly */
+}
+
+
+/* --- Dashboard-Specific Components --- */
+.chart-container {
+    position: relative;
+    height: 220px;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .chart-container {
+        height: 180px;
+    }
+}
+
+/* Loading animation for charts */
+.chart-container.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #1e3a8a; /* JRU Blue */
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Styles for the date filter buttons on the dashboard */
+.filter-btn {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;
+    border: 1px solid #d1d5db;
+}
+.filter-btn.active {
+    background-color: #1e3a8a; /* JRU Blue */
+    color: #ffffff;
+    font-weight: 600;
+    border-color: #1e3a8a;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+.filter-btn:hover:not(.active) {
+    background-color: #e5e7eb;
+}
+
+
+/* --- Global Components & Utilities --- */
+
+/* Notification Dropdown */
+#notification-dropdown {
+    display: none;
+}
+.notification-item:hover {
+    background-color: #f3f4f6;
+}
+
+/* Modal Overlay base style */
+.modal-overlay {
+    transition: opacity 0.3s ease;
+}
+
+/* Custom browser scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
