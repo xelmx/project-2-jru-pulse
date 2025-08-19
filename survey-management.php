@@ -29,12 +29,12 @@ $user = $_SESSION['user_data'];
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
-    <?php
-        $currentPage = 'survey-management'; // Set the current page for active link highlighting
-        require_once 'includes/sidebar.php';
-        require_once 'includes/logout.php'; // Include the logout confirmation modal
-    ?>
-        
+            <?php
+                $currentPage = 'survey-management'; // Set the current page for active link highlighting
+                require_once 'includes/sidebar.php';
+                require_once 'includes/logout.php'; // Include the logout confirmation modal
+            ?>
+                
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->

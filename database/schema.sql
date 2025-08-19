@@ -175,9 +175,8 @@ CREATE TABLE `students` (
 ) ENGINE=InnoDB;
 
 ALTER TABLE `students`
-  DROP COLUMN `full_name`,
-  ADD COLUMN `first_name` VARCHAR(100) NOT NULL AFTER `student_number`,
-  ADD COLUMN `last_name` VARCHAR(100) NOT NULL AFTER `first_name`;
+ADD COLUMN `created_at` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+ADD COLUMN `updated_at` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp();
 
 INSERT INTO `students` (student_number, first_name, last_name, email, division, course_or_strand) 
 VALUES 
@@ -201,3 +200,19 @@ CREATE TABLE users (
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+CREATE TABLE `students` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_number` varchar(30) NOT NULL,
+  `first_name` varchar(100) NOT NULL,
+  `last_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `division` varchar(100) NOT NULL,
+  `course_or_strand` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `student_number` (`student_number`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB; DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

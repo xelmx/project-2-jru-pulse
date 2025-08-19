@@ -18,8 +18,7 @@ $user = $_SESSION['user_data'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management - JRU PULSE</title>
-   
+    <title>JRU PULSE - Student Management</title>
     <!-- Font Awesome for Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/output.css">
@@ -41,20 +40,20 @@ $user = $_SESSION['user_data'];
             <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">Student Roster</h1>
+                        <h1 class="text-2xl font-bold text-gray-800">Student Database</h1>
                         <p class="text-sm text-gray-500 mt-1">Add, view, and manage the university's student records.</p>
                     </div>
                     <div class="flex items-center space-x-4">
-<div class="flex items-center space-x-4">
-    <button id="openImportModalBtn" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors flex items-center shadow-sm">
-        <i class="fas fa-file-csv mr-2"></i>
-        Import from CSV
-    </button>
-    <button id="openAddModalBtn" class="bg-jru-blue text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors flex items-center font-medium shadow-sm">
-        <i class="fas fa-plus mr-2"></i>
-        Add Student
-    </button>
-</div> 
+                        <div class="flex items-center space-x-4">
+                            <button id="openImportModalBtn" class="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 text-sm font-medium transition-colors flex items-center shadow-sm">
+                                <i class="fas fa-file-csv mr-2"></i>
+                                Import from CSV
+                            </button>
+                            <button id="openAddModalBtn" class="bg-jru-blue text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors flex items-center font-medium shadow-sm">
+                                <i class="fas fa-plus mr-2"></i>
+                                Add Student
+                            </button>
+                        </div> 
                     </div>
                 </div>
             </header>
@@ -170,7 +169,7 @@ $user = $_SESSION['user_data'];
             </div>
         </form>
     </div>
-</div>```
+</div>
 
     <!-- Confirmation Modal -->
     <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">

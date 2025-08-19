@@ -1,15 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
-
-    // --- === DOM Element References === ---
-    // --- Add/Edit Student Modal ---
+    // --- DOM Element References ---
     const studentModal = document.getElementById('studentModal');
     const studentModalContent = document.getElementById('studentModalContent');
     const openAddModalBtn = document.getElementById('openAddModalBtn');
     const closeModalBtns = document.querySelectorAll('.closeModalBtn');
     const studentForm = document.getElementById('studentForm');
     const modalTitle = document.getElementById('modalTitle');
-    
-    // --- Import CSV Modal ---
     const importModal = document.getElementById('importModal');
     const importModalContent = document.getElementById('importModalContent');
     const openImportModalBtn = document.getElementById('openImportModalBtn');
@@ -18,45 +14,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const importSubmitBtn = document.getElementById('importSubmitBtn');
     const importResultsArea = document.getElementById('importResultsArea');
     const csvFileInput = document.getElementById('csv_file');
-
-    // --- Confirmation Modal ---
     const confirmModal = document.getElementById('confirmModal');
     const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
     const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
     let studentIdToDelete = null;
-
-    // --- Main Page Elements ---
     const studentsTableBody = document.getElementById('studentsTableBody');
     const searchInput = document.getElementById('searchInput');
 
-    // --- === API Calls & Data Handling === ---
-
+    // --- API Calls & Data Handling ---
     const fetchStudents = async (searchTerm = '') => {
         try {
-            const response = await fetch(`api/get_students.php?search=${encodeURIComponent(searchTerm)}`);
+            // UPDATED: Calls the new unified API endpoint
+            const response = await fetch(`api/students.php?search=${encodeURIComponent(searchTerm)}`);
             if (!response.ok) throw new Error('Network response was not ok.');
-            
             const result = await response.json();
-            
             if (result.success) {
                 renderTable(result.data);
             } else {
-                console.error('Failed to fetch students:', result.message);
                 studentsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-4">${result.message}</td></tr>`;
             }
         } catch (error) {
-            console.error('Fetch error:', error);
-            studentsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Error loading data. Please check the connection.</td></tr>`;
+            studentsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-red-500 py-4">Error loading data. Please check connection.</td></tr>`;
         }
     };
 
     const renderTable = (students) => {
-        studentsTableBody.innerHTML = ''; // Clear existing rows
+        studentsTableBody.innerHTML = '';
         if (students.length === 0) {
             studentsTableBody.innerHTML = `<tr><td colspan="6" class="text-center text-gray-500 py-10">No students found. Try adding one or changing your search.</td></tr>`;
             return;
         }
-
         students.forEach(student => {
             const row = `
                 <tr class="hover:bg-gray-50 transition-colors duration-150">
@@ -69,65 +56,34 @@ document.addEventListener('DOMContentLoaded', function () {
                         <button class="text-jru-blue hover:text-blue-800 font-semibold edit-btn" data-id="${student.id}">Edit</button>
                         <button class="text-red-600 hover:text-red-800 font-semibold ml-4 delete-btn" data-id="${student.id}">Delete</button>
                     </td>
-                </tr>
-            `;
+                </tr>`;
             studentsTableBody.insertAdjacentHTML('beforeend', row);
         });
     };
+     
+    // --- Modals ---
+    const openStudentModal = () => { studentModal.classList.remove('hidden'); setTimeout(() => studentModalContent.classList.remove('opacity-0', '-translate-y-4'), 10); };
+    const closeStudentModal = () => { studentModalContent.classList.add('opacity-0', '-translate-y-4'); setTimeout(() => studentModal.classList.add('hidden'), 300); };
+    const openImportModal = () => { importForm.reset(); importResultsArea.innerHTML = ''; importResultsArea.classList.add('hidden'); importSubmitBtn.disabled = false; importSubmitBtn.querySelector('.btn-text').textContent = 'Upload & Import'; importSubmitBtn.querySelector('i').classList.add('hidden'); importModal.classList.remove('hidden'); setTimeout(() => importModalContent.classList.remove('opacity-0', '-translate-y-4'), 10); };
+    const closeImportModal = () => { importModalContent.classList.add('opacity-0', '-translate-y-4'); setTimeout(() => importModal.classList.add('hidden'), 300); };
 
-    // --- === Modal Management === ---
-    
-    // --- Add/Edit Modal ---
-    const openStudentModal = () => {
-        studentModal.classList.remove('hidden');
-        setTimeout(() => {
-            studentModalContent.classList.remove('opacity-0', '-translate-y-4');
-        }, 10);
-    };
-    const closeStudentModal = () => {
-        studentModalContent.classList.add('opacity-0', '-translate-y-4');
-        setTimeout(() => {
-            studentModal.classList.add('hidden');
-        }, 300);
-    };
-
-    // --- Import Modal ---
-    const openImportModal = () => {
-        importForm.reset();
-        importResultsArea.innerHTML = '';
-        importResultsArea.classList.add('hidden');
-        importSubmitBtn.disabled = false;
-        importSubmitBtn.querySelector('.btn-text').textContent = 'Upload & Import';
-        importSubmitBtn.querySelector('i').classList.add('hidden');
-        
-        importModal.classList.remove('hidden');
-        setTimeout(() => {
-            importModalContent.classList.remove('opacity-0', '-translate-y-4');
-        }, 10);
-    };
-    const closeImportModal = () => {
-        importModalContent.classList.add('opacity-0', '-translate-y-4');
-        setTimeout(() => {
-            importModal.classList.add('hidden');
-        }, 300);
-    };
-
-    // --- === Form Handlers === ---
-    
+    // --- Form Handlers ---
     const handleStudentFormSubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData(studentForm);
         const studentData = Object.fromEntries(formData.entries());
         
-        const url = studentData.id ? 'api/update_student.php' : 'api/add_student.php';
+        // UPDATED: Determine URL and Method for RESTful API
+        const isUpdating = studentData.id;
+        const url = isUpdating ? `api/students.php?id=${studentData.id}` : 'api/students.php';
+        const method = isUpdating ? 'PUT' : 'POST';
 
         try {
             const response = await fetch(url, {
-                method: 'POST',
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(studentData),
             });
-            
             const result = await response.json();
             if (result.success) {
                 closeStudentModal();
@@ -136,51 +92,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert(`Error: ${result.message}`);
             }
         } catch (error) {
-            console.error('Submit error:', error);
             alert('An unexpected error occurred.');
         }
     };
 
     const handleImportFormSubmit = async (event) => {
         event.preventDefault();
-        if (csvFileInput.files.length === 0) {
-            alert('Please select a CSV file to upload.');
-            return;
-        }
-
-        importSubmitBtn.disabled = true;
-        importSubmitBtn.querySelector('.btn-text').textContent = 'Importing...';
-        importSubmitBtn.querySelector('i').classList.remove('hidden');
-
+        if (csvFileInput.files.length === 0) { alert('Please select a CSV file to upload.'); return; }
+        importSubmitBtn.disabled = true; importSubmitBtn.querySelector('.btn-text').textContent = 'Importing...'; importSubmitBtn.querySelector('i').classList.remove('hidden');
         try {
-            const response = await fetch('api/import_csv.php', {
-                method: 'POST',
-                body: new FormData(importForm)
-            });
+            const response = await fetch('api/import_csv.php', { method: 'POST', body: new FormData(importForm) });
             const result = await response.json();
             displayImportResults(result);
-
-            if (response.ok && result.success) {
-                fetchStudents(); // Refresh the main student table
-            }
+            if (response.ok && result.success) { fetchStudents(); }
         } catch (error) {
-            console.error('Import error:', error);
             displayImportResults({ success: false, message: 'A client-side error occurred. Check the console.' });
         } finally {
-            importSubmitBtn.disabled = false;
-            importSubmitBtn.querySelector('.btn-text').textContent = 'Upload & Import';
-            importSubmitBtn.querySelector('i').classList.add('hidden');
+            importSubmitBtn.disabled = false; importSubmitBtn.querySelector('.btn-text').textContent = 'Upload & Import'; importSubmitBtn.querySelector('i').classList.add('hidden');
         }
     };
 
     const displayImportResults = (result) => {
-        importResultsArea.innerHTML = '';
-        importResultsArea.classList.remove('hidden');
-
-        if (!result) {
-            importResultsArea.innerHTML = `<div class="p-4 bg-red-100 border-l-4 border-red-500 text-red-700"><p>An unknown error occurred.</p></div>`;
-            return;
-        }
+        importResultsArea.innerHTML = ''; importResultsArea.classList.remove('hidden');
+        if (!result) { importResultsArea.innerHTML = `<div class="p-4 bg-red-100 border-l-4 border-red-500 text-red-700"><p>An unknown error occurred.</p></div>`; return; }
         let html = '';
         if (result.success) {
             html += `<div class="p-4 bg-green-100 border-l-4 border-green-500 text-green-700"><h4 class="font-bold">Import Complete!</h4><p>${result.successCount} record(s) imported successfully.</p>${result.errorCount > 0 ? `<p class="mt-1">${result.errorCount} record(s) failed.</p>` : ''}</div>`;
@@ -193,91 +127,40 @@ document.addEventListener('DOMContentLoaded', function () {
         importResultsArea.innerHTML = html;
     };
     
-    // --- === Event Listeners === ---
-
-    // Add Student Button
-    openAddModalBtn.addEventListener('click', () => {
-        studentForm.reset();
-        document.getElementById('studentId').value = '';
-        modalTitle.textContent = 'Add New Student';
-        openStudentModal();
-    });
-
-    // Import CSV Button
+    // --- Event Listeners ---
+    openAddModalBtn.addEventListener('click', () => { studentForm.reset(); document.getElementById('studentId').value = ''; modalTitle.textContent = 'Add New Student'; openStudentModal(); });
     openImportModalBtn.addEventListener('click', openImportModal);
-
-    // Close Modal Buttons
     closeModalBtns.forEach(btn => btn.addEventListener('click', closeStudentModal));
     closeImportModalBtns.forEach(btn => btn.addEventListener('click', closeImportModal));
-
-    // Form Submissions
     studentForm.addEventListener('submit', handleStudentFormSubmit);
     importForm.addEventListener('submit', handleImportFormSubmit);
-
-    // Search Input
     searchInput.addEventListener('input', () => fetchStudents(searchInput.value.trim()));
-
-    // Edit and Delete buttons (using event delegation)
     studentsTableBody.addEventListener('click', (event) => {
         const editBtn = event.target.closest('.edit-btn');
         const deleteBtn = event.target.closest('.delete-btn');
-
         if (editBtn) {
             const studentId = editBtn.dataset.id;
             const row = editBtn.closest('tr');
-            const student = {
-                id: studentId,
-                student_number: row.cells[0].textContent,
-                first_name: row.cells[1].textContent.split(' ')[0],
-                last_name: row.cells[1].textContent.split(' ').slice(1).join(' '),
-                email: row.cells[2].textContent,
-                division: row.cells[3].textContent,
-                course_or_strand: row.cells[4].textContent,
-            };
+            const student = { id: studentId, student_number: row.cells[0].textContent, first_name: row.cells[1].textContent.split(' ')[0], last_name: row.cells[1].textContent.split(' ').slice(1).join(' '), email: row.cells[2].textContent, division: row.cells[3].textContent, course_or_strand: row.cells[4].textContent };
             modalTitle.textContent = 'Edit Student';
-            for (const key in student) {
-                if (studentForm.elements[key]) studentForm.elements[key].value = student[key];
-            }
+            for (const key in student) { if (studentForm.elements[key]) studentForm.elements[key].value = student[key]; }
             openStudentModal();
         }
-
-        if (deleteBtn) {
-            studentIdToDelete = deleteBtn.dataset.id;
-            confirmModal.classList.remove('hidden');
-        }
+        if (deleteBtn) { studentIdToDelete = deleteBtn.dataset.id; confirmModal.classList.remove('hidden'); }
     });
-
-    // Confirmation Modal buttons
-    cancelDeleteBtn.addEventListener('click', () => {
-        confirmModal.classList.add('hidden');
-        studentIdToDelete = null;
-    });
-
+    cancelDeleteBtn.addEventListener('click', () => { confirmModal.classList.add('hidden'); studentIdToDelete = null; });
     confirmDeleteBtn.addEventListener('click', async () => {
         if (!studentIdToDelete) return;
-
         try {
-            const response = await fetch('api/delete_student.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id: studentIdToDelete }),
-            });
+            // UPDATED: Calls the new unified API endpoint with DELETE method
+            const response = await fetch(`api/students.php?id=${studentIdToDelete}`, 
+                { method: 'DELETE' });
+                
             const result = await response.json();
-            if (result.success) {
-                fetchStudents(searchInput.value.trim());
-            } else {
-                alert('Error deleting student.');
-            }
-        } catch (error) {
-            console.error('Delete error:', error);
-        } finally {
-            confirmModal.classList.add('hidden');
-            studentIdToDelete = null;
-        }
+            if (result.success) { fetchStudents(searchInput.value.trim()); } 
+            else { alert('Error deleting student.'); }
+        } catch (error) { console.error('Delete error:', error); } 
+        finally { confirmModal.classList.add('hidden'); studentIdToDelete = null; }
     });
-
-    // --- === Initial Load === ---
-    // This is the most important part: Fetch all students when the page loads.
     fetchStudents();
-
 });

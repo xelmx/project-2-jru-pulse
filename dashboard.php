@@ -28,7 +28,7 @@
 
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
-          <?php
+       <?php
             $currentPage = 'dashboard'; 
             require_once 'includes/sidebar.php';
 
