@@ -38,7 +38,15 @@
                     <span class="menu-text ml-3">Performance Analytics</span>
                 </a>
             </li>
+           
             <li>
+                <a href="student-management.php" 
+                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'student-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                    <i class="fas fa-school text-lg w-6"></i>
+                    <span class="menu-text ml-3">Student Management</span>
+                </a>
+            </li>
+             <li>
                 <a href="#" 
                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'user-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
                     <i class="fas fa-users text-lg w-6"></i>
@@ -46,7 +54,7 @@
                 </a>
             </li>
             <li>
-                <a href="#" 
+                <a href="settings.php" 
                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'settings') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
                     <i class="fas fa-cog text-lg w-6"></i>
                     <span class="menu-text ml-3">Settings</span>

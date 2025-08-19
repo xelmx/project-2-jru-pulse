@@ -83,7 +83,7 @@ switch($method) {
         respond(true, "Office created successfully", ["id" => $id]);
 
     } catch(PDOException $e) {
-        if ($e->getCode() == 23000) {  // This catch block will tell us if it's a database error like a duplicate entry // Code 23000 is for integrity constraint violations
+        if ($e->getCode() == 23000) {  // TTell if it's a database error like a duplicate entry // Code 23000 is for integrity constraint violations
             respond(false, "An office with this name or code already exists.", null, 409); // 409 Conflict
         }
         respond(false, "Error creating office: " . $e->getMessage(), null, 500);

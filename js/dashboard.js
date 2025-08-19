@@ -233,8 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 }
 
-
-
     // --- INITIAL LOAD ---
     initializeCharts();
     setupEventListeners();
