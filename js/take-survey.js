@@ -353,32 +353,90 @@ function initializeTakeSurveyFlow() {
     }
 
      function setupQuestionInteractivity() {
-        document.querySelectorAll('.emoji-label').forEach(label => {  // Emoji Hover Interactivity
-            const textPopup = label.querySelector('.emoji-text-popup');
-            
-            label.addEventListener('mouseenter', () => {  // When the mouse enters/hover the label area
-                label.style.transform = 'scale(1.15)'; // Enlarge the whole label
-                if (textPopup) {
-                    textPopup.style.opacity = '1'; // Make text visible
-                }
+    
+    // --- FIX FOR EMOJI (LIKERT) QUESTIONS ---
+    const emojiLabels = document.querySelectorAll('.emoji-label');
+    
+    emojiLabels.forEach(label => {
+        // Add hover effects for better UX
+        const textPopup = label.querySelector('.emoji-text-popup');
+        label.addEventListener('mouseenter', () => {
+            label.style.transform = 'scale(1.15)';
+            if (textPopup) textPopup.style.opacity = '1';
+        });
+        label.addEventListener('mouseleave', () => {
+            label.style.transform = 'scale(1)';
+            if (textPopup) textPopup.style.opacity = '0';
+        });
+
+        const radio = label.querySelector('input[type="radio"]');
+        if (radio) {
+            // This is the core of the fix. We listen for a click on the whole label.
+            label.addEventListener('click', () => {
+                // 1. Manually check the radio button inside this label
+                radio.checked = true;
+
+                // 2. Find ALL emoji labels within this same question
+                const allLabelsInGroup = radio.closest('.flex').querySelectorAll('.emoji-label');
+
+                // 3. Loop through ALL of them to update their visual state
+                allLabelsInGroup.forEach(siblingLabel => {
+                    const siblingRadio = siblingLabel.querySelector('input[type="radio"]');
+                    const checkmarkDiv = siblingLabel.querySelector('.checkmark-indicator'); // Added a class for easy targeting
+
+                    if (siblingRadio.checked) {
+                        // This is the one that should be selected
+                        checkmarkDiv.classList.add('bg-jru-blue', 'border-jru-blue');
+                    } else {
+                        // All others should be deselected
+                        checkmarkDiv.classList.remove('bg-jru-blue', 'border-jru-blue');
+                    }
+                });
+            });
+        }
+    });
+
+
+    // --- FIX FOR STAR RATING QUESTIONS ---
+    const starRatingContainer = document.querySelector('.star-rating');
+    if (starRatingContainer) {
+        const stars = starRatingContainer.querySelectorAll('.fa-star');
+        const hiddenInput = starRatingContainer.nextElementSibling; // The hidden input that stores the value
+
+        stars.forEach(star => {
+            // Handle click event to set the rating
+            star.addEventListener('click', () => {
+                const value = star.dataset.value;
+                hiddenInput.value = value; // Set the actual value
+                
+                // Update the visual state of all stars in the group
+                stars.forEach(s => {
+                    if (parseInt(s.dataset.value) <= parseInt(value)) {
+                        s.classList.remove('far');
+                        s.classList.add('fas', 'text-yellow-400');
+                    } else {
+                        s.classList.remove('fas', 'text-yellow-400');
+                        s.classList.add('far');
+                    }
+                });
             });
 
-            label.addEventListener('mouseleave', () => {   // When the mouse leaves the label area
-                label.style.transform = 'scale(1)'; // Return to normal size
-                if (textPopup) {
-                    textPopup.style.opacity = '0'; // Make text invisible
-                }
+            // Handle hover effect to show potential rating
+            star.addEventListener('mouseenter', () => {
+                const hoverValue = star.dataset.value;
+                stars.forEach(s => {
+                    if (parseInt(s.dataset.value) <= parseInt(hoverValue)) {
+                        s.classList.add('text-yellow-300'); // Use a slightly different color for hover
+                    }
+                });
+
             });
-        });
-        
-        document.querySelectorAll('.emoji-label input[type="radio"]').forEach(radio => { // Re-check selected radio button for emojis
-            radio.addEventListener('change', () => {
-                // Un-style all siblings
-                radio.closest('.flex').querySelectorAll('.emoji-label .w-4').forEach(div => div.classList.remove('bg-jru-blue', 'border-jru-blue'));
-                // Style the selected one
-                if(radio.checked) {
-                    radio.nextElementSibling.classList.add('bg-jru-blue', 'border-jru-blue');
-                }
+
+            star.addEventListener('mouseleave', () => {
+                 stars.forEach(s => {
+                    s.classList.remove('text-yellow-300'); // Remove hover effect
+                });
             });
         });
     }
+}
