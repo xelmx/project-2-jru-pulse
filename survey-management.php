@@ -24,7 +24,7 @@ $user = $_SESSION['user_data'];
     <link rel="stylesheet" href="css/output.css">
 </head>
 <style>
-    ad
+
 </style>
 <body class="bg-gray-50 font-sans">
     <div class="flex h-screen overflow-hidden">
@@ -478,38 +478,24 @@ $user = $_SESSION['user_data'];
 </div>
 
         <!-- Reusable Confirmation Modal -->
-    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
-        <div class="flex items-center justify-center min-h-screen p-4">
-            <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
-                <div class="p-6">
-                    <div class="flex items-start">
-                        <!-- Icon (e.g., warning) -->
-                        <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
-                        </div>
-                        <div class="ml-4 text-left">
-                            <!-- Title -->
-                            <h3 id="confirmationTitle" class="text-lg leading-6 font-bold text-gray-900">
-                                Archive Office
-                            </h3>
-                            <!-- Message Body -->
-                            <div class="mt-2">
-                                <p id="confirmationMessage" class="text-sm text-gray-600">
-                                    <!--Are you sure you want to archive this office? It will be hidden from active use. -->
-                                </p>
-                            </div>
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <i id="confirmationIcon" class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <h3 id="confirmationTitle" class="text-lg leading-6 font-bold text-gray-900">Confirm Action</h3>
+                        <div class="mt-2">
+                            <p id="confirmationMessage" class="text-sm text-gray-600">Are you sure?</p>
                         </div>
                     </div>
                 </div>
-                <!-- Action Buttons -->
-                <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-4 rounded-b-xl">
-                    <button id="confirmCancelBtn" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        Cancel
-                    </button>
-                    <button id="confirmActionBtn" type="button" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
-                        Archive
-                    </button>
-                </div>
+            </div>
+            <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-4 rounded-b-xl">
+                <button id="confirmCancelBtn" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+                <button id="confirmActionBtn" type="button" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">Confirm</button>
             </div>
         </div>
     </div>

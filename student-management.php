@@ -34,8 +34,8 @@ $user = $_SESSION['user_data'];
         include 'includes/logout.php';
         ?>
 
-        <!-- Main Content (with margin-left to offset sidebar) -->
-        <div class="flex-1 flex flex-col overflow-hidden ml-64">
+        
+        <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
             <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
                 <div class="flex items-center justify-between">
@@ -93,6 +93,7 @@ $user = $_SESSION['user_data'];
     </div>
 
 <!-- Add/Edit Student Modal -->
+``<!-- Add/Edit Student Modal (with UI Fixes) -->
 <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full transform transition-all opacity-0 -translate-y-4" id="studentModalContent">
         <form id="studentForm">
@@ -114,136 +115,180 @@ $user = $_SESSION['user_data'];
                 <input type="hidden" id="studentId" name="id">
 
                 <!-- Student Number -->
-                <div class="relative">
+                <div>
                     <label for="student_number" class="block text-sm font-medium text-gray-700 mb-1">Student Number</label>
-                    <i class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                    <input type="text" name="student_number" id="student_number" required placeholder="e.g., 24-123456"
-                           class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                    <!-- NEW: A 'relative' container for just the input and icon -->
+                    <div class="relative">
+                        <i class="fas fa-id-card absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="text" name="student_number" id="student_number" required placeholder="e.g., 24-123456"
+                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                    </div>
                 </div>
 
                 <!-- First & Last Name -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="relative">
+                    <div>
                         <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                        <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                        <input type="text" name="first_name" id="first_name" required placeholder="Juan"
-                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="first_name" id="first_name" required placeholder="Juan"
+                                   class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        </div>
                     </div>
-                    <div class="relative">
+                    <div>
                         <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                        <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                        <input type="text" name="last_name" id="last_name" required placeholder="Dela Cruz"
-                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                            <input type="text" name="last_name" id="last_name" required placeholder="Dela Cruz"
+                                   class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        </div>
                     </div>
                 </div>
 
                 <!-- Email Address -->
-                <div class="relative">
+                <div>
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-                    <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                    <input type="email" name="email" id="email" required placeholder="juandelacruz@jru.edu"
-                           class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                    <div class="relative">
+                        <i class="fas fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input type="email" name="email" id="email" required placeholder="juandelacruz@jru.edu"
+                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                    </div>
                 </div>
 
                 <!-- Division & Course/Strand -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="relative">
+                    <div>
                         <label for="division" class="block text-sm font-medium text-gray-700 mb-1">Division</label>
-                        <i class="fas fa-building-columns absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                        <input type="text" name="division" id="division" required placeholder="e.g., College, SHS"
-                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        <select name="division" id="division" required
+                                class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        </select>
                     </div>
-                    <div class="relative">
+                    <div>
                         <label for="course_or_strand" class="block text-sm font-medium text-gray-700 mb-1">Course / Strand</label>
-                        <i class="fas fa-book-open absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 mt-3"></i>
-                        <input type="text" name="course_or_strand" id="course_or_strand" required placeholder="e.g., BSIT, ABM"
-                               class="pl-10 pr-4 py-2 block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition">
+                        <select name="course_or_strand" id="course_or_strand" required disabled
+                                class="block w-full border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-jru-blue focus:border-transparent transition disabled:bg-gray-100">
+                            <option value="">Select a division first</option>
+                        </select>
                     </div>
                 </div>
             </div>
 
             <!-- Modal Footer -->
             <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-xl">
-                <button type="button" class="closeModalBtn bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 shadow-sm transition-colors">Cancel</button>
-                <button type="submit" id="saveStudentBtn" class="bg-jru-blue text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-jru-blue shadow-sm transition-colors">Save Student</button>
+                <button type="button" class="closeModalBtn bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm transition-colors">Cancel</button>
+                <button type="submit" id="saveStudentBtn" class="bg-jru-blue text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-900 shadow-sm transition-colors">Save Student</button>
             </div>
         </form>
     </div>
 </div>
 
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
-         <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full">
-            <div class="p-6 text-center">
-                 <i class="fas fa-exclamation-triangle text-4xl text-jru-orange mx-auto mb-4"></i>
-                <h3 class="text-lg font-bold text-gray-800">Are you sure?</h3>
-                <p class="text-sm text-gray-500 mt-2">Do you really want to delete this record? This process cannot be undone.</p>
+    <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
+        <div class="p-6">
+            <div class="flex items-start">
+                <!-- Icon -->
+                <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <div class="ml-4 text-left">
+                    <!-- Title (This ID is CRITICAL) -->
+                    <h3 id="confirmationTitle" class="text-lg leading-6 font-bold text-gray-900">
+                        Confirm Action
+                    </h3>
+                    <!-- Message Body (This ID is CRITICAL) -->
+                    <div class="mt-2">
+                        <p id="confirmationMessage" class="text-sm text-gray-600">
+                           Are you sure?
+                        </p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex justify-center space-x-3">
-                <button id="cancelDeleteBtn" class="bg-white border border-gray-300 rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                <button id="confirmDeleteBtn" class="bg-red-600 text-white rounded-md px-4 py-2 text-sm font-medium hover:bg-red-700">Delete</button>
-            </div>
+        </div>
+        <!-- Action Buttons (These IDs are CRITICAL) -->
+        <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-4 rounded-b-xl">
+            <button id="confirmCancelBtn" type="button" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
+                Cancel
+            </button>
+            <button id="confirmActionBtn" type="button" class="px-4 py-2 bg-red-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-red-700">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+    <div id="toastNotification" class="fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl z-[100] transition-all duration-300 ease-in-out opacity-0 hidden">
+        <div class="flex items-center">
+            <i id="toastIcon" class="mr-3 text-xl"></i>
+            <span id="toastMessage" class="font-medium"></span>
         </div>
     </div>
     
-<!-- Import from CSV Modal -->
-<div id="importModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full transform transition-all opacity-0 -translate-y-4" id="importModalContent">
-        <form id="importForm" enctype="multipart/form-data">
-            <!-- Modal Header -->
-            <div class="p-6 border-b bg-gray-50 rounded-t-xl">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-4">
-                         <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                            <i class="fas fa-file-import text-xl text-green-700"></i>
+    <!-- Import from CSV Modal -->
+    <div id="importModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full transform transition-all opacity-0 -translate-y-4" id="importModalContent">
+            <form id="importForm" enctype="multipart/form-data">
+                <!-- Modal Header -->
+                <div class="p-6 border-b bg-gray-50 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-file-import text-xl text-green-700"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-800">Import Students from CSV</h3>
+                                <p class="text-sm text-gray-500">Upload a file to bulk-add student records.</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800">Import Students from CSV</h3>
-                            <p class="text-sm text-gray-500">Upload a file to bulk-add student records.</p>
-                        </div>
+                        <button type="button" class="closeImportModalBtn text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
                     </div>
-                    <button type="button" class="closeImportModalBtn text-gray-400 hover:text-gray-700 text-2xl">&times;</button>
-                </div>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="p-8">
-                <!-- Step 1: Instructions & File Format -->
-                <div class="mb-6 p-4 bg-blue-50 border-l-4 border-jru-blue rounded-r-lg">
-                    <h4 class="font-bold text-jru-blue">Instructions</h4>
-                    <p class="text-sm text-gray-700 mt-1">
-                        Ensure your CSV file has a header row and that the columns are in the following order:
-                    </p>
-                    <code class="block bg-gray-200 text-gray-800 p-2 rounded-md mt-2 text-xs">
-                        student_number,first_name,last_name,email,division,course_or_strand
-                    </code>
                 </div>
 
-                <!-- Step 2: File Upload -->
-                <div>
-                    <label for="csv_file" class="block text-sm font-medium text-gray-700 mb-1">CSV File</label>
-                    <input type="file" name="csv_file" id="csv_file" required accept=".csv"
-                           class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-jru-blue/10 file:text-jru-blue hover:file:bg-jru-blue/20 transition">
-                </div>
-                
-                <!-- Results Area (Initially Hidden) -->
-                <div id="importResultsArea" class="hidden mt-6"></div>
-            </div>
+                <!-- Modal Body -->
+                <div class="p-8">
+                    <!-- Instructions & File Format -->
+                    <div class="mb-6 p-4 bg-blue-50 border-l-4 border-jru-blue rounded-r-lg">
+                        <h4 class="font-bold text-jru-blue">Instructions</h4>
+                        <p class="text-sm text-gray-700 mt-1">
+                            Ensure your CSV file has a header row and that the columns are in the following order:
+                        </p>
+                        <code class="block bg-gray-200 text-gray-800 p-2 rounded-md mt-2 text-xs">
+                            student_number,first_name,last_name,email,division,course_or_strand
+                        </code>
+                    </div>
 
-            <!-- Modal Footer -->
-            <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-xl">
-                <button type="button" class="closeImportModalBtn bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm">Cancel</button>
-                <button type="submit" id="importSubmitBtn" class="bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-green-700 shadow-sm transition-colors flex items-center justify-center min-w-[120px]">
-                    <span class="btn-text">Upload & Import</span>
-                    <i class="fas fa-spinner fa-spin hidden ml-2"></i>
-                </button>
-            </div>
-        </form>
+                    <div class="mb-6">
+                            <a href="templates/student_template.csv" download="student_template.csv"
+                        class="inline-flex items-center text-sm font-medium text-gray-600 hover:text-jru-blue transition-colors">
+                            <i class="fas fa-download mr-2"></i>
+                            Download CSV Template
+                        </a>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div>
+                        <label for="csv_file" class="block text-sm font-medium text-gray-700 mb-1">CSV File</label>
+                        <input type="file" name="csv_file" id="csv_file" required accept=".csv"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-jru-blue/10 file:text-jru-blue hover:file:bg-jru-blue/20 transition">
+                    </div>
+                    
+                    <!-- Results Area (Initially Hidden) -->
+                    <div id="importResultsArea" class="hidden mt-6"></div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-xl">
+                    <button type="button" class="closeImportModalBtn bg-white border border-gray-300 rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm">Cancel</button>
+                    <button type="submit" id="importSubmitBtn" class="bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-green-700 shadow-sm transition-colors flex items-center justify-center min-w-[120px]">
+                        <span class="btn-text">Upload & Import</span>
+                        <i class="fas fa-spinner fa-spin hidden ml-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
           
-            
-<script src="js/main.js"></script>
-<script src="js/student-management.js"></script>
+                
+    <script src="js/main.js"></script>
+    <script src="js/student-management.js"></script>
 </body>
 </html>
