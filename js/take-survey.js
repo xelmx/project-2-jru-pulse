@@ -299,7 +299,7 @@ function initializeTakeSurveyFlow() {
         const name = `q_${question.id}`;
         const savedAnswer = surveyState.answers[name] || '';
 
-        let content = `<div id="question-input-wrapper">`;   // We will use a simple DIV as a wrapper for the inputs. give it a unique ID so we can easily find it later.
+        let content = `<div id="question-input-wrapper">`;   // Use a simple DIV as a wrapper for the inputs. give it a unique ID so we can easily find it later.
 
         switch (question.type) {
         case 'likert': // Emoji Scale  
@@ -353,51 +353,47 @@ function initializeTakeSurveyFlow() {
     }
 
      function setupQuestionInteractivity() {
-    
-    // --- FIX FOR EMOJI (LIKERT) QUESTIONS ---
-    const emojiLabels = document.querySelectorAll('.emoji-label');
-    
-    emojiLabels.forEach(label => {
-        // Add hover effects for better UX
-        const textPopup = label.querySelector('.emoji-text-popup');
-        label.addEventListener('mouseenter', () => {
-            label.style.transform = 'scale(1.15)';
-            if (textPopup) textPopup.style.opacity = '1';
-        });
-        label.addEventListener('mouseleave', () => {
-            label.style.transform = 'scale(1)';
-            if (textPopup) textPopup.style.opacity = '0';
-        });
-
-        const radio = label.querySelector('input[type="radio"]');
-        if (radio) {
-            // This is the core of the fix. We listen for a click on the whole label.
-            label.addEventListener('click', () => {
-                // 1. Manually check the radio button inside this label
-                radio.checked = true;
-
-                // 2. Find ALL emoji labels within this same question
-                const allLabelsInGroup = radio.closest('.flex').querySelectorAll('.emoji-label');
-
-                // 3. Loop through ALL of them to update their visual state
-                allLabelsInGroup.forEach(siblingLabel => {
-                    const siblingRadio = siblingLabel.querySelector('input[type="radio"]');
-                    const checkmarkDiv = siblingLabel.querySelector('.checkmark-indicator'); // Added a class for easy targeting
-
-                    if (siblingRadio.checked) {
-                        // This is the one that should be selected
-                        checkmarkDiv.classList.add('bg-jru-blue', 'border-jru-blue');
-                    } else {
-                        // All others should be deselected
-                        checkmarkDiv.classList.remove('bg-jru-blue', 'border-jru-blue');
-                    }
-                });
+        
+        // EMOJI (LIKERT) QUESTIONS ---
+        const emojiLabels = document.querySelectorAll('.emoji-label');
+        
+        emojiLabels.forEach(label => {
+            // Add hover effects for better UX
+            const textPopup = label.querySelector('.emoji-text-popup');
+            label.addEventListener('mouseenter', () => {
+                label.style.transform = 'scale(1.15)';
+                if (textPopup) textPopup.style.opacity = '1';
             });
-        }
-    });
+            label.addEventListener('mouseleave', () => {
+                label.style.transform = 'scale(1)';
+                if (textPopup) textPopup.style.opacity = '0';
+            });
 
+            const radio = label.querySelector('input[type="radio"]');
+            if (radio) {
+                
+                label.addEventListener('click', () => {
+                    // Manually check the radio button inside this label
+                    radio.checked = true;
 
-    // --- FIX FOR STAR RATING QUESTIONS ---
+                    //  Find ALL emoji labels within this same question
+                    const allLabelsInGroup = radio.closest('.flex').querySelectorAll('.emoji-label');
+
+                    // Loop through ALL of them to update their visual state
+                    allLabelsInGroup.forEach(siblingLabel => {
+                        const siblingRadio = siblingLabel.querySelector('input[type="radio"]');
+                        const checkmarkDiv = siblingLabel.querySelector('.checkmark-indicator'); // Added a class for easy targeting
+
+                        if (siblingRadio.checked) {
+                            checkmarkDiv.classList.add('bg-jru-blue', 'border-jru-blue');
+                        } else {
+                            checkmarkDiv.classList.remove('bg-jru-blue', 'border-jru-blue');
+                        }
+                    });
+                });
+            }
+        });
+
     const starRatingContainer = document.querySelector('.star-rating');
     if (starRatingContainer) {
         const stars = starRatingContainer.querySelectorAll('.fa-star');
