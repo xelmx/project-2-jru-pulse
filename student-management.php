@@ -249,7 +249,7 @@ $user = $_SESSION['user_data'];
                     <div class="mb-6 p-4 bg-blue-50 border-l-4 border-jru-blue rounded-r-lg">
                         <h4 class="font-bold text-jru-blue">Instructions</h4>
                         <p class="text-sm text-gray-700 mt-1">
-                            Ensure your CSV file has a header row and that the columns are in the following order:
+                            Ensure your CSV file has the following columns:
                         </p>
                         <code class="block bg-gray-200 text-gray-800 p-2 rounded-md mt-2 text-xs">
                             student_number,first_name,last_name,email,division,course_or_strand

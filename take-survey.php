@@ -39,7 +39,8 @@
             </div>
 
             <!-- SCREEN 2A: Student Path -->
-            <div id="studentScreen" class="p-8 hidden">
+            <div id="studentScreen" class="p-8 hidden">'
+                <div id="studentError" class="error-message hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md"></div>
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Student Verification</h2>
                 <p class="text-gray-600 mb-6">Please sign in with your JRU Google account (<span class="font-semibold">@my.jru.edu</span>) to continue.</p>
                 
@@ -59,6 +60,7 @@
 
             <!-- SCREEN 2B: Guest Path -->
             <div id="guestScreen" class="p-8 hidden">
+                 <div id="guestError" class="error-message hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md"></div>
                 <h2 class="text-xl font-bold text-gray-800 mb-2">Welcome!</h2>
                 <p class="text-gray-600 mb-6">Please provide the following details to proceed with the survey.</p>
                 

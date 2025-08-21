@@ -1,4 +1,5 @@
-<?php // api/register-respondent.php
+<?php
+
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -11,7 +12,7 @@ require_once '../config/connection.php';
 
 function respond($success, $message, $data = null, $code = 200) {
     http_response_code($code);
-    echo json_encode(["success" => $success, "message" => $message, "data" => $data]);
+    echo json_encode(["success" => (bool)$success, "message" => $message, "data" => $data]);
     exit;
 }
 
@@ -26,46 +27,71 @@ if (!isset($data['type']) || !isset($data['identifier'])) {
 }
 
 $type = $data['type'];
-$identifier_email = $data['identifier'];
+$identifier_email = trim($data['identifier']);
+$respondent_id = null;
 
 try {
     $database = new Database();
     $db = $database->getConnection();
+    $db->beginTransaction();
 
-    $student_id_to_insert = null;
-    $email_for_non_student = null;
+    // First, always check if this email belongs to a registered student.
+    $stmt_student = $db->prepare("SELECT id FROM students WHERE email = :email");
+    $stmt_student->execute([':email' => $identifier_email]);
+    $student_record = $stmt_student->fetch(PDO::FETCH_ASSOC);
 
-    if ($type === 'student') {
-        $stmt = $db->prepare("SELECT id FROM students WHERE email = :email"); // verify the student against the master list.
-        $stmt->execute([':email' => $identifier_email]);
-        $student_record = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($student_record) {
 
-        if ($student_record) {
-            $student_id_to_insert = $student_record['id'];
+        // --- THIS PERSON IS A VERIFIED STUDENT ---
+        $student_id = $student_record['id'];
+
+        // Find the respondent record linked to this student's master ID.
+        $stmt_find_resp = $db->prepare("SELECT id FROM respondents WHERE student_id = :student_id");
+        $stmt_find_resp->execute([':student_id' => $student_id]);
+        $respondent_record = $stmt_find_resp->fetch(PDO::FETCH_ASSOC);
+
+        if ($respondent_record) {
+            $respondent_id = $respondent_record['id'];
         } else {
+            // First time this student is taking a survey. Create their record.
+            $stmt_create_resp = $db->prepare("INSERT INTO respondents (respondent_type, student_id) VALUES ('student', :student_id)");
+            $stmt_create_resp->execute([':student_id' => $student_id]);
+            $respondent_id = $db->lastInsertId();
+        }
+
+    } else {
+        // --- THIS PERSON IS A GUEST ---
+        if ($type === 'student') {
             respond(false, "This student email is not registered. Please contact an administrator.", null, 403);
         }
-    } else {
-        $email_for_non_student = $identifier_email; // This is the non-student path. Just save their email.
+
+        // Find the guest record using their unique email address.
+        $stmt_find_resp = $db->prepare("SELECT id FROM respondents WHERE identifier_email = :email AND respondent_type = 'non-student'");
+        $stmt_find_resp->execute([':email' => $identifier_email]);
+        $respondent_record = $stmt_find_resp->fetch(PDO::FETCH_ASSOC);
+
+        if ($respondent_record) {
+            $respondent_id = $respondent_record['id'];
+        } else {
+            // First time this guest is taking a survey. Create their record.
+            $stmt_create_resp = $db->prepare("INSERT INTO respondents (respondent_type, identifier_email) VALUES ('non-student', :email)");
+            $stmt_create_resp->execute([':email' => $identifier_email]);
+            $respondent_id = $db->lastInsertId();
+        }
     }
 
-    $respondent_query = "INSERT INTO respondents (respondent_type, student_id, identifier_email) VALUES (:type, :student_id, :email)"; // Now, create the official Respondent record.
-    $respondent_stmt = $db->prepare($respondent_query);
-    $respondent_stmt->execute([
-        ':type' => $type,
-        ':student_id' => $student_id_to_insert,
-        ':email' => $email_for_non_student
-    ]);
+    $db->commit();
 
-    $new_respondent_id = $db->lastInsertId();
-
-    if ($new_respondent_id) {
-        respond(true, "Respondent created successfully.", ["respondent_id" => $new_respondent_id]);
+    if ($respondent_id) {
+        respond(true, "Respondent verified successfully.", ["respondent_id" => $respondent_id]);
     } else {
-        throw new Exception("Failed to create respondent record.");
+        throw new Exception("Critical error: Could not find or create a respondent ID.");
     }
 
 } catch (Exception $e) {
+    if (isset($db) && $db->inTransaction()) {
+        $db->rollBack();
+    }
     respond(false, "A database error occurred: " . $e->getMessage(), null, 500);
 }
 ?>

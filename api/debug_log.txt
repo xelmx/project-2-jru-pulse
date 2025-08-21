@@ -1,0 +1,8 @@
+[2025-08-21 12:12:19] SCRIPT EXECUTED. DATA: {"type":"student","identifier":"lyleearl.rementizo@my.jru.edu","first_name":"Lyle Earl","last_name":"Rementizo"}
+[2025-08-21 12:14:07] SCRIPT EXECUTED. DATA: {"type":"student","identifier":"lyleearl.rementizo@my.jru.edu","first_name":"Lyle Earl","last_name":"Rementizo"}
+[2025-08-21 12:14:46] SCRIPT EXECUTED. DATA: {"type":"guest","identifier":"wiz.khalifa@gmail.com","first_name":"Wiz","last_name":"Khalifa","role":"Alumni"}
+[2025-08-21 12:15:38] SCRIPT EXECUTED. DATA: {"type":"guest","identifier":"wiz.khalifa@gmail.com","first_name":"Wiz","last_name":"Khalifa","role":"Parent"}
+[2025-08-21 12:16:27] SCRIPT EXECUTED. DATA: {"type":"student","identifier":"lyleearl.rementizo@my.jru.edu","first_name":"Lyle Earl","last_name":"Rementizo"}
+[2025-08-21 12:17:02] SCRIPT EXECUTED. DATA: {"type":"student","identifier":"lyleearl.rementizo@my.jru.edu","first_name":"Lyle Earl","last_name":"Rementizo"}
+[2025-08-21 12:19:00] SCRIPT EXECUTED. DATA: {"type":"guest","identifier":"wiz.khalifa@gmail.com","first_name":"Wiz","last_name":"Khalifa","role":"Visitor"}
+[2025-08-21 12:21:00] SCRIPT EXECUTED. DATA: {"type":"guest","identifier":"wiz.khalifa@gmail.com","first_name":"Wiz","last_name":"Khalifa","role":"Parent"}
