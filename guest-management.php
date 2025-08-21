@@ -110,7 +110,7 @@ $user = $_SESSION['user_data'];
         </div>
     </div>
 
-    <!-- Confirmation Modal (This is reused) -->
+    <!-- Confirmation Modal -->
     <div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-md w-full">
             <div class="p-6"><div class="flex items-start"><div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100"><i class="fas fa-exclamation-triangle text-red-600 text-xl"></i></div><div class="ml-4 text-left"><h3 id="confirmationTitle" class="text-lg font-bold text-gray-900">Confirm</h3><div class="mt-2"><p id="confirmationMessage" class="text-sm text-gray-600">Are you sure?</p></div></div></div></div>
@@ -128,8 +128,8 @@ $user = $_SESSION['user_data'];
         </div>
     </div>
 
-    <!-- Include necessary scripts -->
+
     <script src="js/main.js"></script>
-    <script src="js/guest-management.js"></script> <!-- MODIFIED: Points to the new JS file -->
+    <script src="js/guest-management.js"></script> 
 </body>
 </html>

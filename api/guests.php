@@ -1,5 +1,4 @@
 <?php
-// --- api/guests.php ---
 
 header("Content-Type: application/json");
 require_once '../config/connection.php';
@@ -99,7 +98,7 @@ switch ($method) {
             respond(false, "Guest ID is required for deletion.", null, 400);
         }
 
-        // NOTE: This is a permanent delete. Ensure the front-end has a strong confirmation modal.
+        // NOTE: This is a permanent delete.
         $query = "DELETE FROM guests WHERE id = :id";
         
         try {

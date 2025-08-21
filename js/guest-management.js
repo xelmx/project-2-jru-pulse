@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // --- === DOM Element References === ---
+    //  DOM Element References  
     const guestModal = document.getElementById('guestModal');
     const openAddModalBtn = document.getElementById('openAddModalBtn');
     const closeModalBtns = document.querySelectorAll('.closeModalBtn');
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const confirmActionBtn = document.getElementById('confirmActionBtn');
     const confirmCancelBtn = document.getElementById('confirmCancelBtn');
 
-    // --- === API Calls & Data Handling === ---
+    //   API Calls & Data Handling 
     const fetchGuests = async (searchTerm = '') => {
         try {
             const response = await fetch(`api/guests.php?search=${encodeURIComponent(searchTerm)}`);
@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     };
 
-    // --- === MODAL & NOTIFICATION HELPERS (NEWLY ADDED) === ---
+    // MODAL & NOTIFICATION HELPERS
     const openGuestModal = () => guestModal.classList.remove('hidden');
     const closeGuestModal = () => guestModal.classList.add('hidden');
 
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // --- === FORM & EVENT HANDLERS (MODIFIED) === ---
+    //  FORM & EVENT HANDLERS
     const handleGuestFormSubmit = async (event) => {
         event.preventDefault();
         const formData = new FormData(guestForm);
@@ -109,8 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 closeGuestModal();
                 fetchGuests();
                 
-                // --- THIS IS THE KEY LINE ---
-                // It uses a ternary operator to show a different message based on whether you are updating or adding.
+                // ternary operator to show a different message based on whether you are updating or adding.
                 showToast(isUpdating ? 'Guest updated successfully!' : 'Guest added successfully!', 'success');
                 
             } else {
