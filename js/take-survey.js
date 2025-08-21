@@ -1,7 +1,7 @@
-    // Holds all information for the user's entire session.
+        // Holds all information for the user's entire session.
     const surveyState = {
         surveyId: null,
-        respondent: { type: null, identifier: null, first_name: null, last_name: null, id: null },
+        respondent: { id: null, type: null, identifier: null, first_name: null, last_name: null, role: null },
         surveyData: null,
         answers: {},
         currentQuestionIndex: 0,
@@ -9,29 +9,7 @@
 
     let isRegistering = false;
 
-    function showScreen(screenName, message = '') {
-    const screens = {
-        identity: document.getElementById('identityScreen'),
-        student: document.getElementById('studentScreen'),
-        guest: document.getElementById('guestScreen'),
-        survey: document.getElementById('surveyScreen'),
-        loading: document.getElementById('loadingScreen'),
-        thankYou: document.getElementById('thankYouScreen')
-    };
-    Object.values(screens).forEach(screen => {
-        if (screen) screen.classList.add('hidden');
-    });
-    if (screens[screenName]) {
-        if (screenName === 'loading') {
-            const loadingMessageEl = document.getElementById('loadingMessage');
-            if (loadingMessageEl) loadingMessageEl.textContent = message;
-        }
-        screens[screenName].classList.remove('hidden');
-    }
-}
-
-
-    document.addEventListener('DOMContentLoaded', () => {
+     document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         surveyState.surveyId = urlParams.get('id');
         if (!surveyState.surveyId) {
@@ -40,6 +18,27 @@
         }
         initializeTakeSurveyFlow();
     });
+
+    function showScreen(screenName, message = '') {
+        const screens = {
+            identity: document.getElementById('identityScreen'),
+            student: document.getElementById('studentScreen'),
+            guest: document.getElementById('guestScreen'),
+            survey: document.getElementById('surveyScreen'),
+            loading: document.getElementById('loadingScreen'),
+            thankYou: document.getElementById('thankYouScreen')
+        };
+        Object.values(screens).forEach(screen => {
+            if (screen) screen.classList.add('hidden');
+        });
+        if (screens[screenName]) {
+            if (screenName === 'loading') {
+                const loadingMessageEl = document.getElementById('loadingMessage');
+                if (loadingMessageEl) loadingMessageEl.textContent = message;
+            }
+            screens[screenName].classList.remove('hidden');
+        }
+    }
 
 
     function showInlineError(screenName, message) {
@@ -88,6 +87,7 @@
             showScreen('student');
             renderGoogleButton();
         });
+        
         guestBtn.addEventListener('click', () => showScreen('guest'));
         goBackBtns.forEach(btn => btn.addEventListener('click', () => showScreen('identity')));
         studentConsentCheck.addEventListener('change', renderGoogleButton);
@@ -95,8 +95,10 @@
             guestContinueBtn.disabled = !guestConsentCheck.checked;
         });
 
+            // --- GUEST FORM SUBMISSION ---
         guestForm.addEventListener('submit', (e) => {
             e.preventDefault();
+            // This now correctly includes the 'role' from the dropdown.
             const dataToSend = {
                 type: 'guest',
                 identifier: document.getElementById('guestEmail').value,
@@ -107,63 +109,40 @@
             registerAndProceed(dataToSend);
         });
 
-        viewTermsLinks.forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                if(termsModal) termsModal.classList.remove('hidden');
-            });
-        });
-        closeTermsModalBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                if (termsModal) termsModal.classList.add('hidden');
-            });
-        });
+        viewTermsLinks.forEach(link => link.addEventListener('click', (e) => { e.preventDefault(); termsModal?.classList.remove('hidden'); }));
+        closeTermsModalBtns.forEach(btn => btn.addEventListener('click', () => termsModal?.classList.add('hidden')));
 
-        // Google Sign-In Logic
-        function renderGoogleButton() {
-                if (!studentConsentCheck.checked) {
-                    googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><span class="font-medium text-gray-500">Please agree to the terms to enable sign-in.</span></div>`;
-                    return;
-                }
-                try {
-                    if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
-                        googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><i class="fas fa-spinner fa-spin"></i><span class="font-medium text-gray-500 ml-2">Loading Sign-In...</span></div>`;
-                        return;
-                    }
-                    google.accounts.id.initialize({
-                        client_id: "913799866499-p05hvm7muoaiqogtp85d0s95jiuavfuv.apps.googleusercontent.com",
-                        callback: handleGoogleSignIn
-                    });
-                    google.accounts.id.renderButton(googleSignInContainer, { theme: "outline", size: "large", width: "380", text: "signin_with" });
-                } catch (error) {
-                    googleSignInContainer.innerHTML = `<p class="text-center text-red-500">Could not load Google Sign-In.</p>`;
-                }
-            }
-            
-        // Initially, show the identity screen
         showScreen('identity');
     }
 
-    function isJruEmail(email) {
-        if (!email || typeof email !== 'string') {
-            return false; // Return false for invalid input
+    // --- Google Sign-In Logic ---
+    function renderGoogleButton() {
+        const googleSignInContainer = document.getElementById('googleSignInButton');
+        if (!document.getElementById('studentConsentCheck').checked) {
+            googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><span class="font-medium text-gray-500">Please agree to the terms to enable sign-in.</span></div>`;
+            return;
         }
-        // Convert the email to lowercase for a case-insensitive check
-        const lowerCaseEmail = email.toLowerCase();
-        
-        // Check if the email ends with either of the valid domains
-        return lowerCaseEmail.endsWith('@my.jru.edu') || lowerCaseEmail.endsWith('@jru.edu');
+        try {
+            if (typeof google === 'undefined' || typeof google.accounts === 'undefined') {
+                googleSignInContainer.innerHTML = `<div class="w-full text-center py-3 px-4 border border-gray-200 bg-gray-50 rounded-lg"><i class="fas fa-spinner fa-spin"></i><span class="font-medium text-gray-500 ml-2">Loading Sign-In...</span></div>`;
+                return;
+            }
+            google.accounts.id.initialize({
+                client_id: "913799866499-p05hvm7muoaiqogtp85d0s95jiuavfuv.apps.googleusercontent.com",
+                callback: handleGoogleSignIn
+            });
+            google.accounts.id.renderButton(googleSignInContainer, { theme: "outline", size: "large", width: "380", text: "signin_with" });
+        } catch (error) {
+            googleSignInContainer.innerHTML = `<p class="text-center text-red-500">Could not load Google Sign-In.</p>`;
+        }
     }
-        
+
     function handleGoogleSignIn(googleResponse) {
         const userInfo = parseJWT(googleResponse.credential);
-        
         if (!userInfo || !isJruEmail(userInfo.email)) {
             showInlineError('student', "Sign-in failed. Please use a valid JRU email account (@my.jru.edu or @jru.edu).");
             return;
         }
-        
-     //JRU user is verified, proceed with registration
         const dataToSend = {
             type: 'student',
             identifier: userInfo.email,
@@ -173,13 +152,10 @@
         registerAndProceed(dataToSend);
     }
 
+    // --- Core API and Survey Flow ---
     async function registerAndProceed(dataToSend) {
-
-        console.log('API CALL INITIATED at:', new Date().toLocaleTimeString(), 'with data:', dataToSend);
-        
-        if (isRegistering) return; 
-        isRegistering = true; 
-
+        if (isRegistering) return;
+        isRegistering = true;
         showScreen('loading', 'Verifying your session...');
         try {
             const response = await fetch('api/register-respondent.php', {
@@ -192,40 +168,16 @@
                 surveyState.respondent = { ...dataToSend, id: result.data.respondent_id };
                 fetchAndPrepareSurvey();
             } else {
-                // This error comes from the API (e.g., student not on the list)
                 throw new Error(result.message);
             }
         } catch (error) {
-            // Determine which screen to show the error on
             const errorScreen = dataToSend.type === 'student' ? 'student' : 'guest';
-            showScreen(errorScreen); // Go back to the correct screen
+            showScreen(errorScreen);
             showInlineError(errorScreen, `Verification Failed: ${error.message}`);
+        } finally {
+            isRegistering = false;
         }
     }
-
-    function parseJWT(token) {  // --- Helper Functions (including custom JWT parser) ---
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-            return JSON.parse(jsonPayload);
-        } catch (e) { return null; }
-    }
-
-     function renderError(message) {
-        surveyContainer.innerHTML = `<div class="text-center py-8 bg-red-50 p-6 rounded-lg"><i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i><h1 class="text-2xl font-bold text-red-600">An Error Occurred</h1><p class="text-gray-700 mt-2">${message}</p></div>`;
-    }
-
-    function renderLoading(message) {
-        surveyContainer.innerHTML = `
-            <div class="text-center py-8">
-                <h1 class="text-2xl font-bold text-gray-900">${message}</h1>
-                <!-- Optional: You could add a spinning icon here for a better visual effect -->
-                <i class="fas fa-spinner fa-spin text-jru-blue text-4xl mt-4"></i>
-            </div>
-        `;
-    }
-
 
     async function fetchAndPrepareSurvey() {
         document.getElementById('surveyHeader').classList.remove('hidden');
@@ -238,8 +190,7 @@
                 surveyState.surveyData.questions = JSON.parse(result.data.questions_json);
                 document.getElementById('surveyTitle').textContent = surveyState.surveyData.title;
                 document.getElementById('surveyDescription').textContent = surveyState.surveyData.description;
-
-                if (Array.isArray(surveyState.surveyData.questions) && surveyState.surveyData.questions.length > 0) {
+                if (surveyState.surveyData.questions?.length > 0) {
                     surveyState.currentQuestionIndex = 0;
                     renderQuestionStage();
                     showScreen('survey');
@@ -255,7 +206,6 @@
             alert(`Error: ${error.message}`);
         }
     }
-
 
     function renderQuestionStage() {
         const surveyScreen = document.getElementById('surveyScreen');
@@ -346,6 +296,38 @@
         }
     }
 
+    function isJruEmail(email) {
+        if (!email || typeof email !== 'string') {
+            return false; // Return false for invalid input
+        }
+        // Convert the email to lowercase for a case-insensitive check
+        const lowerCaseEmail = email.toLowerCase();
+        // Check if the email ends with either of the valid domains
+        return lowerCaseEmail.endsWith('@my.jru.edu') || lowerCaseEmail.endsWith('@jru.edu');
+    }
+
+    function parseJWT(token) {  // --- Helper Functions (including custom JWT parser) ---
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (e) { return null; }
+    }
+
+     function renderError(message) {
+        surveyContainer.innerHTML = `<div class="text-center py-8 bg-red-50 p-6 rounded-lg"><i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i><h1 class="text-2xl font-bold text-red-600">An Error Occurred</h1><p class="text-gray-700 mt-2">${message}</p></div>`;
+    }
+
+    function renderLoading(message) {
+        surveyContainer.innerHTML = `
+            <div class="text-center py-8">
+                <h1 class="text-2xl font-bold text-gray-900">${message}</h1>
+                <!-- Optional: You could add a spinning icon here for a better visual effect -->
+                <i class="fas fa-spinner fa-spin text-jru-blue text-4xl mt-4"></i>
+            </div>
+        `;
+    }
 
    function renderInputForQuestion(question) { // --- UTILITY & HELPER FUNCTIONS ---
         const name = `q_${question.id}`;

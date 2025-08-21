@@ -34,7 +34,6 @@ try {
     $db = $database->getConnection();
     $db->beginTransaction();
 
-    // Step 1: ALWAYS check if the identifier email belongs to a registered student first.  "single source of truth" rule.
     $stmt_student = $db->prepare("SELECT id FROM students WHERE email = :email LIMIT 1");
     $stmt_student->execute([':email' => $identifier_email]);
     $student_record = $stmt_student->fetch(PDO::FETCH_ASSOC);
@@ -42,57 +41,50 @@ try {
     if ($student_record) {
         // --- THIS PERSON IS A VERIFIED STUDENT ---
         $student_id = $student_record['id'];
-        
-        // Now, find or create their single entry in the respondents table.
         $stmt_find_resp = $db->prepare("SELECT id FROM respondents WHERE student_id = :student_id LIMIT 1");
         $stmt_find_resp->execute([':student_id' => $student_id]);
         $respondent_record = $stmt_find_resp->fetch(PDO::FETCH_ASSOC);
-
         if ($respondent_record) {
-            // Found them. Use the existing ID.
             $respondent_id = $respondent_record['id'];
         } else {
-            // Not found. Create a new respondent record linked to their student ID.
             $stmt_create_resp = $db->prepare("INSERT INTO respondents (respondent_type, student_id) VALUES ('student', :student_id)");
             $stmt_create_resp->execute([':student_id' => $student_id]);
             $respondent_id = $db->lastInsertId();
         }
-
     } else {
         // --- THIS PERSON IS A GUEST ---
-        // Safety check: If the front-end THOUGHT they were a student but they're not in the DB, it's an error.
         if ($type === 'student') {
-            respond(false, "This student email is not registered. Please contact an administrator or sign in as a guest.", null, 403);
+            respond(false, "This student email is not registered. Please sign in as a guest.", null, 403);
         }
 
-        // Step 2a: Find or create their identity in the new 'guests' table.
         $stmt_find_guest = $db->prepare("SELECT id FROM guests WHERE email = :email LIMIT 1");
         $stmt_find_guest->execute([':email' => $identifier_email]);
         $guest_record = $stmt_find_guest->fetch(PDO::FETCH_ASSOC);
         $guest_id = null;
 
         if ($guest_record) {
-            // Found an existing guest.
             $guest_id = $guest_record['id'];
         } else {
-            // New guest. Create them.
-            if (!isset($data['first_name']) || !isset($data['last_name'])) {
-                 respond(false, "First name and last name are required for new guests.", null, 400);
+            // --- MODIFIED SECTION ---
+            // We now also require a 'role' for new guests.
+            if (!isset($data['first_name']) || !isset($data['last_name']) || !isset($data['role'])) {
+                 respond(false, "First name, last name, and role are required for new guests.", null, 400);
             }
-            $stmt_create_guest = $db->prepare("INSERT INTO guests (first_name, last_name, email) VALUES (:first_name, :last_name, :email)");
+            // The INSERT query now includes the 'role' column.
+            $stmt_create_guest = $db->prepare("INSERT INTO guests (first_name, last_name, email, role) VALUES (:first_name, :last_name, :email, :role)");
             $stmt_create_guest->execute([
                 ':first_name' => trim($data['first_name']),
                 ':last_name' => trim($data['last_name']),
-                ':email' => $identifier_email
+                ':email' => $identifier_email,
+                ':role' => trim($data['role']) // Save the new role data
             ]);
             $guest_id = $db->lastInsertId();
+            // --- END OF MODIFIED SECTION ---
         }
 
-        // Step 2b: Now that we have a guest_id, find or create their entry in the respondents table.
         $stmt_find_resp = $db->prepare("SELECT id FROM respondents WHERE guest_id = :guest_id LIMIT 1");
         $stmt_find_resp->execute([':guest_id' => $guest_id]);
         $respondent_record = $stmt_find_resp->fetch(PDO::FETCH_ASSOC);
-
         if ($respondent_record) {
             $respondent_id = $respondent_record['id'];
         } else {
@@ -103,18 +95,10 @@ try {
     }
 
     $db->commit();
-
-    if ($respondent_id) {
-        respond(true, "Respondent verified successfully.", ["respondent_id" => $respondent_id]);
-    } else {
-        // This should theoretically never happen, but it's a good safety net.
-        throw new Exception("Critical error: Could not find or create a respondent ID.");
-    }
+    respond(true, "Respondent verified successfully.", ["respondent_id" => $respondent_id]);
 
 } catch (Exception $e) {
-    if (isset($db) && $db->inTransaction()) {
-        $db->rollBack();
-    }
+    if (isset($db) && $db->inTransaction()) { $db->rollBack(); }
     respond(false, "A database error occurred: " . $e->getMessage(), null, 500);
 }
 ?>

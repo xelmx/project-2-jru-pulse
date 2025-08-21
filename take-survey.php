@@ -80,11 +80,15 @@
                         </div>
                         <div>
                             <label for="guestRole" class="block text-sm font-medium text-gray-700">Your Role</label>
-                            <select id="guestRole" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm">
-                                <option>Parent</option>
-                                <option>Alumni</option>
-                                <option>Visitor</option>
-                                <option>Other</option>
+                            <select id="guestRole" name="role" required 
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-jru-blue focus:border-jru-blue sm:text-sm">
+                                <option value="" disabled selected>Please select your role</option>
+                                <option value="JRU Alumnus">JRU Alumnus</option>
+                                <option value="JRU Parent/Guardian">JRU Parent/Guardian</option>
+                                <option value="Student (Non-JRU)">Student (Non-JRU)</option>
+                                <option value="Parent/Guardian (Non-JRU)">Parent/Guardian (Non-JRU)</option>
+                                <option value="Industry Partner">Industry Partner</option>
+                                <option value="Other">Other</option>
                             </select>
                         </div>
                     </div>
