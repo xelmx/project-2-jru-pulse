@@ -216,3 +216,21 @@ CREATE TABLE `students` (
   UNIQUE KEY `student_number` (`student_number`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB; DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+CREATE TABLE `guests` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT,
+  `first_name` VARCHAR(150) NOT NULL,
+  `last_name` VARCHAR(150) NOT NULL,
+  `email` VARCHAR(255) NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT current_timestamp(),
+  `updated_at` TIMESTAMP NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+ALTER TABLE `respondents`
+  ADD COLUMN `guest_id` INT(11) NULL DEFAULT NULL AFTER `student_id`,
+  MODIFY COLUMN `respondent_type` ENUM('student', 'guest') NOT NULL,
+  ADD CONSTRAINT `fk_respondents_guest_id` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`id`) ON DELETE SET NULL;
