@@ -11,7 +11,7 @@ if ($_SERVER["REQUEST_METHOD"] == 'OPTIONS') {
 
 require_once '../config/connection.php';
 
-// A standardized function to send back responses. This is great practice.
+// --- Helper & Connection ---
 function respond($success, $message, $data = null, $code = 200) {
     http_response_code($code);
     echo json_encode([

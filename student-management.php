@@ -93,7 +93,6 @@ $user = $_SESSION['user_data'];
     </div>
 
 <!-- Add/Edit Student Modal -->
-``<!-- Add/Edit Student Modal (with UI Fixes) -->
 <div id="studentModal" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full transform transition-all opacity-0 -translate-y-4" id="studentModalContent">
         <form id="studentForm">

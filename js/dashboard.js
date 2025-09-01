@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
         concernsList.innerHTML = ''; // Clear existing list
 
         if (concernsData && concernsData.length > 0) {
-            // The API gives us an array of arrays, e.g., [["wifi", 5], ["staff", 3]]
+            // The API gives an array of arrays, e.g., [["wifi", 5], ["staff", 3]]
             concernsData.forEach(item => {
                 const keyword = item[0];
                 const count = item[1];
@@ -198,7 +198,6 @@ document.addEventListener('DOMContentLoaded', () => {
             concernsList.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No common feedback topics found for this period.</p>`;
         }
     }
-    
     
 
     function setupEventListeners() {

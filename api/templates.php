@@ -6,7 +6,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization, x-requested-w
 
 require_once '../config/connection.php';
 
-// Use the same respond helper function from your other API files
+// --- Helper & Connection ---
 function respond($success, $message, $data = null, $code = 200) {
     http_response_code($code);
     echo json_encode(["success" => (bool)$success, "message" => $message, "data" => $data]);
