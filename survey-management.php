@@ -501,7 +501,7 @@ $user = $_SESSION['user_data'];
     </div>
 
 
-    <!-- Success and Error Modal -->
+    <!-- ToastNotif Success and Error Modal -->
     <div id="toastNotification" class="fixed top-5 right-5 text-white py-3 px-6 rounded-lg shadow-xl z-[100] transition-all duration-300 ease-in-out opacity-0 hidden">
         <div class="flex items-center">
             <i id="toastIcon" class="mr-3 text-xl"></i>

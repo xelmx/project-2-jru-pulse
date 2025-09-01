@@ -237,3 +237,8 @@ ALTER TABLE `respondents`
 
   ALTER TABLE `guests`
 ADD COLUMN `role` VARCHAR(100) NOT NULL AFTER `email`;
+
+
+ALTER TABLE `users` 
+ADD COLUMN `office_id` INT(11) NULL DEFAULT NULL AFTER `role`,
+ADD CONSTRAINT `fk_users_office_id` FOREIGN KEY (`office_id`) REFERENCES `offices`(`id`) ON DELETE SET NULL;

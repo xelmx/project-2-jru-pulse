@@ -14,13 +14,13 @@ $user = $_SESSION['user_data'];
     <title>JRU PULSE - User Management</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/output.css">
-    <link rel="stylesheet" href="css/admin-main.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body class="bg-gray-100 font-sans">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <?php
-        $currentPage = 'user-management';
+        $currentPage = 'user-management'; // Set the current page for the sidebar
         require_once 'includes/sidebar.php';
         ?>
 
@@ -30,7 +30,6 @@ $user = $_SESSION['user_data'];
             <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <!-- MODIFIED: Title and description -->
                         <h1 class="text-2xl font-bold text-gray-800">User Management</h1>
                         <p class="text-sm text-gray-500 mt-1">Add, view, and manage system administrators and office heads.</p>
                     </div>
@@ -62,12 +61,13 @@ $user = $_SESSION['user_data'];
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Office</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
-                                <!-- JS population data for user-->
+                                <!-- JS will populate this -->
                             </tbody>
                         </table>
                     </div>
@@ -91,12 +91,21 @@ $user = $_SESSION['user_data'];
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email (Login)</label>
                         <input type="email" name="email" id="email" required class="block w-full border-gray-300 rounded-lg">
                     </div>
-                    <div>
-                        <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <select name="role" id="role" required class="block w-full border-gray-300 rounded-lg">
-                            <option value="admin">Admin</option>
-                            <option value="office_head">Office Head</option>
-                        </select>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                            <select name="role" id="role" required class="block w-full border-gray-300 rounded-lg">
+                                <option value="admin">Admin</option>
+                                <option value="office_head">Office Head</option>
+                            </select>
+                        </div>
+                        <!-- This container will be shown/hidden by JavaScript -->
+                        <div id="office-select-container" class="hidden">
+                            <label for="office_id" class="block text-sm font-medium text-gray-700 mb-1">Assigned Office</label>
+                            <select name="office_id" id="office_id" class="block w-full border-gray-300 rounded-lg">
+                                <!-- Office options will be populated by JavaScript -->
+                            </select>
+                        </div>
                     </div>
                 </div>
                 <div class="bg-gray-50 px-6 py-4 flex justify-end space-x-3 rounded-b-xl">
