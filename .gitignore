@@ -1,4 +1,26 @@
+#Credentials
 .env
 
+#PHP dependencies
+/vendor/
+
 /node_modules
-/vendor
+
+# Python Virtual Environment & Cache
+venv/
+__pycache__/
+
+
+# AI Model Files
+xlmr_satisfaction_regressor/
+*.safetensors
+*.bin
+
+
+# OS & IDE junk files
+.DS_Store
+.idea/
+.vscode/
+
+# Log files
+*.log

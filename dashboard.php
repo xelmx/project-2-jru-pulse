@@ -121,9 +121,9 @@
                         <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-900">Sentiment Analysis</h3></div>
                         <div class="chart-container"><canvas id="sentimentChart"></canvas></div>
                         <div class="grid grid-cols-3 gap-4 mt-4">
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Positive</span></div><p class="text-lg font-bold text-gray-900">68%</p></div>
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div><span class="text-sm text-gray-600">Neutral</span></div><p class="text-lg font-bold text-gray-900">20%</p></div>
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Negative</span></div><p class="text-lg font-bold text-gray-900">12%</p></div>
+                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Positive</span></div><p id="sentiment-positive-percent" class="text-lg font-bold text-gray-900">...%</p></div>
+                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div><span class="text-sm text-gray-600">Neutral</span></div><p id="sentiment-neutral-percent" class="text-lg font-bold text-gray-900">...%</p></div>
+                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Negative</span></div><p id="sentiment-negative-percent" class="text-lg font-bold text-gray-900">12%</p></div>
                         </div>
                     </div>
                 </div>
@@ -137,7 +137,7 @@
                     </div>
                     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">Common Feedback</h3>
-                        <div class="space-y-3">
+                        <div id="common-feedback-list" class="space-y-3">
                             <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Slow WiFi</span></div><span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">23</span></div>
                             <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Limited Parking</span></div><span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">18</span></div>
                             <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Helpful Staff</span></div><span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">45</span></div>

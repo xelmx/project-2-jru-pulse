@@ -3,8 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     const presetFiltersContainer = document.getElementById('preset-filters');
-    let trendsChart;
-    let ratingDistChart; // Chart for Rating Distribution
+    let trendsChart, ratingDistChart, sentimentChart; //Chart.js instances
 
   
     // --- CHART INITIALIZATION 
@@ -58,6 +57,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+
+        const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+        sentimentChart = new Chart(sentimentCtx, {
+
+            type: 'doughnut',
+            data: {
+                labels: ['Positive', 'Neutral', 'Negative'],
+                datasets:[{
+                    data: [0, 0, 0], //Initial empty data
+                    backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
+                    borderColor: '#ffffff',
+                    broderWidth: 2
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRation: false,
+                plugins: {
+                   legend: { display: false},
+                   tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return ` ${context.label}: ${context.raw} comments`;
+                            }
+                        }
+                   }    
+                }
+            }
+        });
     }
 
     // --- DATA FETCHING--
@@ -98,59 +127,79 @@ document.addEventListener('DOMContentLoaded', () => {
             starsContainer.innerHTML += `<i class="${i <= roundedStars ? 'fas' : 'far'} fa-star text-jru-gold"></i>`;
         }
         
-        // Update the Rating Distribution Chart -->
-        document.getElementById('rating-dist-total').textContent = `${data.total_responses.toLocaleString()} total`;
-        // Prepare the data array in the correct order [5-star, 4-star, ..., 1-star]
-        const newRatingData = [
-            data.rating_distribution[5] || 0,
-            data.rating_distribution[4] || 0,
-            data.rating_distribution[3] || 0,
-            data.rating_distribution[2] || 0,
-            data.rating_distribution[1] || 0
-        ];
-        ratingDistChart.data.datasets[0].data = newRatingData;
+        // URating Distribution Chart 
+       const ratingData = [data.rating_distribution[5], data.rating_distribution[4], data.rating_distribution[3], data.rating_distribution[2], data.rating_distribution[1]];
+        ratingDistChart.data.datasets[0].data = ratingData;
         ratingDistChart.update();
 
-        // Service Performance
-        const performanceContainer = document.getElementById('service-performance-bars');
-        performanceContainer.innerHTML = '';
-        if (data.service_performance.length > 0) {
-            data.service_performance.forEach(item => {
-                const percentage = (item.value / 5) * 100;
-                performanceContainer.innerHTML += `
-                    <div>
-                        <div class="flex justify-between text-sm mb-1"><span>${item.label}</span><span class="font-medium">${item.value.toFixed(1)}/5.0</span></div>
-                        <div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-jru-blue h-2 rounded-full" style="width: ${percentage}%"></div></div>
+        // --- Chart: Satisfaction Trends ---
+    trendsChart.data.labels = data.trends_labels;
+    trendsChart.data.datasets[0].data = data.trends_data;
+    trendsChart.update();
+
+        //SERVICE PERFORMANCE
+    const performanceContainer = document.getElementById('service-performance-bars');
+    performanceContainer.innerHTML = ''; // Clear previous results
+
+    if (data.service_performance && data.service_performance.length > 0) {
+        data.service_performance.forEach(item => {
+            const percentage = (item.value / 5) * 100;
+            const performanceElement = `
+                <div>
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="truncate pr-2">${item.label}</span>
+                        <span class="font-medium flex-shrink-0">${item.value.toFixed(1)}/5.0</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-jru-blue h-2 rounded-full" style="width: ${percentage}%"></div>
+                    </div>
+                </div>`;
+            performanceContainer.innerHTML += performanceElement;
+        });
+    } else {
+        performanceContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No specific service performance data for this period.</p>`;
+    }
+
+        // --- 1. Update Sentiment Analysis ---
+        const sentiments = data.sentiment_analysis;
+        const totalSentiments = sentiments.Positive + sentiments.Neutral + sentiments.Negative;
+
+        // Update the doughnut chart
+        sentimentChart.data.datasets[0].data = [sentiments.Positive, sentiments.Neutral, sentiments.Negative];
+        sentimentChart.update();
+
+        // Update the percentage labels
+        const positivePercent = totalSentiments > 0 ? ((sentiments.Positive / totalSentiments) * 100).toFixed(0) : 0;
+        const neutralPercent = totalSentiments > 0 ? ((sentiments.Neutral / totalSentiments) * 100).toFixed(0) : 0;
+        const negativePercent = totalSentiments > 0 ? ((sentiments.Negative / totalSentiments) * 100).toFixed(0) : 0;
+        
+        document.getElementById('sentiment-positive-percent').textContent = `${positivePercent}%`;
+        document.getElementById('sentiment-neutral-percent').textContent = `${neutralPercent}%`;
+        document.getElementById('sentiment-negative-percent').textContent = `${negativePercent}%`;
+
+        // --- 2. Update Common Feedback ---
+        const concernsList = document.getElementById('common-feedback-list');
+        const concernsData = data.common_concerns;
+        concernsList.innerHTML = ''; // Clear existing list
+
+        if (concernsData && concernsData.length > 0) {
+            // The API gives us an array of arrays, e.g., [["wifi", 5], ["staff", 3]]
+            concernsData.forEach(item => {
+                const keyword = item[0];
+                const count = item[1];
+                const concernElement = `
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <span class="text-sm font-medium text-gray-800">${keyword.charAt(0).toUpperCase() + keyword.slice(1)}</span>
+                        <span class="text-xs bg-gray-200 text-gray-700 font-bold px-2 py-1 rounded-full">${count}</span>
                     </div>`;
+                concernsList.innerHTML += concernElement;
             });
         } else {
-            performanceContainer.innerHTML = `<p class="text-sm text-gray-500">No performance data for this period.</p>`;
+            concernsList.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No common feedback topics found for this period.</p>`;
         }
-        
-        // Update trends chart
-        trendsChart.data.labels = data.trends_labels;
-        trendsChart.data.datasets[0].data = data.trends_data;
-        trendsChart.update();
     }
     
-    // --- OFFICE FILTER POPULATION ---
-    async function populateOfficeFilter() {
-        try {
-            const response = await fetch('api/offices.php');
-            const result = await response.json();
-            if (!result.success) throw new Error(result.message);
-            const officeSelect = document.getElementById('export-office');
-            officeSelect.innerHTML = '<option value="all">All Offices</option>'; 
-            result.data.forEach(office => {
-                const option = document.createElement('option');
-                option.value = office.id;
-                option.textContent = office.name;
-                officeSelect.appendChild(option);
-            });
-        } catch (error) {
-            console.error('Failed to populate office filter:', error);
-        }
-    }
+    
 
     function setupEventListeners() {
         // --- Date and Preset Filter Listeners ---
@@ -236,6 +285,5 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIAL LOAD ---
     initializeCharts();
     setupEventListeners();
-    populateOfficeFilter();
     document.querySelector('.filter-btn[data-period="this_week"]').click();
 });

@@ -234,3 +234,6 @@ ALTER TABLE `respondents`
   ADD COLUMN `guest_id` INT(11) NULL DEFAULT NULL AFTER `student_id`,
   MODIFY COLUMN `respondent_type` ENUM('student', 'guest') NOT NULL,
   ADD CONSTRAINT `fk_respondents_guest_id` FOREIGN KEY (`guest_id`) REFERENCES `guests` (`id`) ON DELETE SET NULL;
+
+  ALTER TABLE `guests`
+ADD COLUMN `role` VARCHAR(100) NOT NULL AFTER `email`;
