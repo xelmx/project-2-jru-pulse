@@ -1,4 +1,12 @@
 <?php
+// --- SECURITY: Only admins can access this API ---
+session_start();
+if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(["success" => false, "message" => "Forbidden: You do not have permission to access this resource."]);
+    exit;
+}
+
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: DELETE, OPTIONS");

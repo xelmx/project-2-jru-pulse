@@ -11,9 +11,12 @@
         </div>
     </div>
     
+     <?php $user_role = $_SESSION['user_data']['role']; ?>
     <!-- Navigation -->
-    <nav class="flex-1 p-4 overflow-y-auto">
+        <nav class="flex-1 p-4 overflow-y-auto">
         <ul class="space-y-2">
+
+            <!-- LINKS VISIBLE TO EVERYONE (ADMIN & OFFICE HEAD)      -->
             <li>
                 <a href="dashboard.php" 
                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'dashboard') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
@@ -22,73 +25,57 @@
                 </a>
             </li>
             <li>
-                <a href="survey-management.php" 
-                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'survey-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    <i class="fas fa-poll-h text-lg w-6"></i>
-                    <span class="menu-text ml-3">Survey Management</span>
-                </a>
-            </li>
-            
-           
-            <li>
-                <a href="student-management.php" 
-                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'student-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    <i class="fas fa-school text-lg w-6"></i>
-                    <span class="menu-text ml-3">Student Management</span>
-                </a>
-            </li>
-             <li>
-                <a href="guest-management.php" 
-                class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'guest-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    <i class="fas fa-user-tag text-lg w-6"></i>
-                    <span class="menu-text ml-3">Guest Management</span>
-                </a>
-            </li>
-            
-            <li>
                 <a href="performance-analytics-reports.php" 
                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'analytics') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
                     <i class="fas fa-chart-line text-lg w-6"></i>
                     <span class="menu-text ml-3">Performance Analytics</span>
                 </a>
             </li>
-             <li>
-                <a href="user-management.php" 
-                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'user-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    <i class="fas fa-users text-lg w-6"></i>
-                    <span class="menu-text ml-3">User Management</span>
-                </a>
-            </li>
-            <li>
-                <a href="settings.php" 
-                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'settings') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    <i class="fas fa-cog text-lg w-6"></i>
-                    <span class="menu-text ml-3">Settings</span>
-                </a>
-            </li>
-        </ul>
-        <div> <a href="survey-builder.php" 
-                   class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'survey-builder') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
-                    
-                </a></div>
+            
+            <!-- ADMIN-ONLY SECTION START -->
 
-        <!-- Quick Actions 
-        <div class="mt-8">
-            <div id="quickActionsHeader" class="menu-text text-xs font-semibold text-gray-50 uppercase tracking-wider mb-3">
-                Quick Actions
-            </div>
-            <div class="space-y-2">
-                <button id="quickNewSurvey" class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                    <i class="fas fa-plus text-sm w-6"></i>
-                    <span class="menu-text ml-3">New Survey</span>
-                </button>
-                <button class="flex items-center w-full px-3 py-2 text-sm text-gray-50 hover:bg-gray-600 rounded-lg transition-colors">
-                    <i class="fas fa-download text-sm w-6"></i>
-                    <span class="menu-text ml-3">Export Data</span>
-                </button>
-            </div>
-        </div> -->
+            <?php if ($user_role === 'admin'): ?>
+                
+                <li>
+                    <a href="survey-management.php" 
+                       class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'survey-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                        <i class="fas fa-poll-h text-lg w-6"></i>
+                        <span class="menu-text ml-3">Survey Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="student-management.php" 
+                       class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'student-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                        <i class="fas fa-school text-lg w-6"></i>
+                        <span class="menu-text ml-3">Student Management</span>
+                    </a>
+                </li>
+                 <li>
+                    <a href="guest-management.php" 
+                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'guest-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                        <i class="fas fa-user-tag text-lg w-6"></i>
+                        <span class="menu-text ml-3">Guest Management</span>
+                    </a>
+                </li>
+                 <li>
+                    <a href="user-management.php" 
+                       class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'user-management') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                        <i class="fas fa-users text-lg w-6"></i>
+                        <span class="menu-text ml-3">User Management</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="settings.php" 
+                       class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'settings') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
+                        <i class="fas fa-cog text-lg w-6"></i>
+                        <span class="menu-text ml-3">Settings</span>
+                    </a>
+                </li>
+
+            <?php endif; ?>
+        </ul>
     </nav>
+
    
     <!-- User Profile  -->
     <div class="p-4 border-t border-gray-200 relative">

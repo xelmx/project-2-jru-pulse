@@ -10,12 +10,18 @@ function respond($success, $message, $data = null, $code = 200) {
     exit;
 }
 
+
 try {
     $database = new Database();
     $db = $database->getConnection();
 } catch (Exception $e) {
     respond(false, "Database connection failed: " . $e->getMessage(), null, 500);
 }
+
+// --- Get Logged-in User's Permission Data ---
+$user_role = $_SESSION['user_data']['role'];
+$user_office_id = $_SESSION['user_data']['office_id'] ?? null; // Null if the user is a global admin
+
 
 // --- 1. Date Filter Logic ---
 $period = $_GET['period'] ?? 'this_week';
@@ -48,8 +54,26 @@ $params = [':startDate' => $startDate, ':endDatePlusOne' => $endDatePlusOne];
 $data = [];
 
 try {
-    // Step 1: Fetch all survey response data
-    $query = "SELECT sr.answers_json, s.questions_json, sr.submitted_at FROM survey_responses sr JOIN surveys s ON sr.survey_id = s.id WHERE {$dateFilterClause}";
+    // Step 1: Build the base query
+    $query = "SELECT sr.answers_json, s.questions_json, sr.submitted_at 
+              FROM survey_responses sr 
+              JOIN surveys s ON sr.survey_id = s.id 
+              WHERE {$dateFilterClause}";
+
+    // Step 2: If the user is an 'office_head', add a condition to the query
+    if ($user_role === 'office_head') {
+        // This line is the core of the permission system.
+        $query .= " AND s.office_id = :user_office_id";
+        
+        // Add the office_id to the parameters for the prepared statement
+        $params[':user_office_id'] = $user_office_id;
+
+        // Ensure an office head is actually assigned to an office
+        if (empty($user_office_id)) {
+            respond(false, "Office Head user is not assigned to any office.", null, 403);
+        }
+    }    
+    
     $stmt = $db->prepare($query);
     $stmt->execute($params);
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);

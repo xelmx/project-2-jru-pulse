@@ -1,4 +1,13 @@
 <?php
+
+// --- SECURITY: Only admins can access this API ---
+session_start();
+if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
+    http_response_code(403);
+    echo json_encode(["success" => false, "message" => "Forbidden: You do not have permission to access this resource."]);
+    exit;
+}
+
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -31,7 +40,7 @@ try {
 
 $method = $_SERVER["REQUEST_METHOD"];
 
-error_log("API a/surveys.php received a request with method: " . $method);
+error_log("API api/surveys.php received a request with method: " . $method);
 
 switch($method) {
       case "GET":
@@ -103,7 +112,7 @@ switch($method) {
         } catch (PDOException $e) { respond(false, "DB error on create: " . $e->getMessage(), null, 500); }
     break;
     
-    case "PUT": //the main router for any "update" action. he first thing to do is get the survey's ID from the URL and the 'action' command from the JSON data sent by the JavaScript. If either is missing, we can't do anything, so we stop early.
+    case "PUT": //the main router for any "update" action. First thing to do is get the survey's ID from the URL and the 'action' command from the JSON data sent by the JavaScript. If either is missing, we can't do anything, so we stop early.
         if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
             respond(false, "A valid Survey ID is required in the URL.", null, 400);
         }

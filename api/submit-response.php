@@ -1,4 +1,4 @@
-<?php // api/submit-response.php (FINAL, CORRECTED VERSION)
+<?php 
 
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
