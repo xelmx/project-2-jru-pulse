@@ -3,9 +3,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     const presetFiltersContainer = document.getElementById('preset-filters');
-    let trendsChart, ratingDistChart, sentimentChart; //Chart.js instances
+    const metricsGrid = document.getElementById('metrics-grid'); // Main grid for metrics
+    const secondaryGrid = document.querySelector('.grid.lg\\:grid-cols-2'); // Grid for charts
+    const tertiaryGrid = document.querySelector('.grid.lg\\:grid-cols-3'); // Grid for trends/feedback
+    const noDataMessage = document.getElementById('no-data-message');
 
-  
+    let trendsChart, ratingDistChart, sentimentChart, modalTrendsChart; //Chart.js instances
+
+    
     // --- CHART INITIALIZATION 
     function initializeCharts() {
         // Trends Chart 
@@ -89,20 +94,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- DATA FETCHING--
+    // --- DATA FETCHING  ---
     async function updateDashboard(params = {}) {
-        document.getElementById('metrics-grid').style.opacity = '0.5';
+        // --- more robust loading state ---
+        noDataMessage.classList.add('hidden'); // Hide any previous "no data" message
+        metricsGrid.classList.remove('hidden');
+        secondaryGrid.classList.remove('hidden');
+        tertiaryGrid.classList.remove('hidden');
+        metricsGrid.style.opacity = '0.5';
+        secondaryGrid.style.opacity = '0.5';
+        tertiaryGrid.style.opacity = '0.5';
+
         const queryParams = new URLSearchParams(params);
         try {
             const response = await fetch(`api/dashboard.php?${queryParams.toString()}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
+            
             updateUI(result.data);
+
         } catch (error) {
             console.error('Failed to update dashboard:', error);
-            alert('Could not load dashboard data.');
+            // On failure, hide all data and show the "No Data" container with an error message ---
+            metricsGrid.classList.add('hidden');
+            secondaryGrid.classList.add('hidden');
+            tertiaryGrid.classList.add('hidden');
+            noDataMessage.querySelector('h2').textContent = 'Could Not Load Data';
+            noDataMessage.querySelector('p').textContent = 'An error occurred while fetching dashboard data. Please try again.';
+            noDataMessage.classList.remove('hidden');
         } finally {
-            document.getElementById('metrics-grid').style.opacity = '1';
+            // -- Remove the loading state ---
+            metricsGrid.style.opacity = '1';
+            secondaryGrid.style.opacity = '1';
+            tertiaryGrid.style.opacity = '1';
         }
     }
 
