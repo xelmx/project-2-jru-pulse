@@ -64,6 +64,17 @@
             </header>
 
             <main class="flex-1 overflow-y-auto p-6">
+
+             <!-- "NO DATA" MESSAGE (HIDDEN BY DEFAULT)-->
+                <div id="no-data-message" class="hidden text-center py-20">
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
+                        <i class="fas fa-info-circle text-5xl text-gray-300 mb-4"></i>
+                        <h2 class="text-xl font-bold text-gray-700">No Data Available</h2>
+                        <p class="text-gray-500 mt-2">There are no survey responses for the selected date range.</p>
+                    </div>
+                </div>
+
+                
                 <!-- Filters -->
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 space-y-4 lg:space-y-0">
                     <div id="preset-filters" class="flex items-center space-x-2 flex-wrap">
