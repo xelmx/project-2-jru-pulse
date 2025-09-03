@@ -8,7 +8,6 @@ if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin'
     exit;
 }
 
-session_start();
 header("Content-Type: application/json");
 
 // Security Check: Only admins can access this API
