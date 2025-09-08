@@ -44,11 +44,21 @@ $endDate = $_GET['endDate'] ?? null;
 if (!$startDate || !$endDate) {
     $end_dt_preset = new DateTime();
     switch ($period) {
-        case 'this_month': $start_dt_preset = new DateTime('first day of this month'); break;
-        case 'this_quarter': $month = $end_dt_preset->format('n'); $quarter = ceil($month / 3); $start_month = ($quarter - 1) * 3 + 1; $start_dt_preset = new DateTime(date('Y') . "-$start_month-01"); break;
-        case 'this_year': $start_dt_preset = new DateTime('first day of January this year'); break;
-        case 'all_time': $start_dt_preset = new DateTime('2020-01-01'); break;
-        case 'this_week': default: $start_dt_preset = new DateTime('monday this week'); break;
+        case 'this_month': 
+            $start_dt_preset = new DateTime('first day of this month'); 
+            break;
+        case 'this_quarter': 
+            $month = $end_dt_preset->format('n'); $quarter = ceil($month / 3); $start_month = ($quarter - 1) * 3 + 1; $start_dt_preset = new DateTime(date('Y') . "-$start_month-01"); 
+            break;
+        case 'this_year': 
+            $start_dt_preset = new DateTime('first day of January this year'); 
+            break;
+        case 'all_time': 
+            $start_dt_preset = new DateTime('2020-01-01'); 
+            break;
+        case 'this_week':
+            default: $start_dt_preset = new DateTime('monday this week'); 
+            break;
     }
     $startDate = $start_dt_preset->format('Y-m-d');
     $endDate = $end_dt_preset->format('Y-m-d');
@@ -59,9 +69,15 @@ function getDashboardDataForPeriod($db, $startDate, $endDate, $user_role, $user_
     $endDatePlusOne = (new DateTime($endDate))->modify('+1 day')->format('Y-m-d');
     $dateFilterClause = "sr.submitted_at BETWEEN :startDate AND :endDatePlusOne";
     $params = [':startDate' => $startDate, ':endDatePlusOne' => $endDatePlusOne];
-    $query = "SELECT sr.answers_json, s.questions_json, sr.submitted_at FROM survey_responses sr JOIN surveys s ON sr.survey_id = s.id WHERE {$dateFilterClause}";
+    $query = "SELECT sr.answers_json, s.questions_json, sr.submitted_at 
+        FROM survey_responses sr 
+        JOIN surveys s 
+        ON sr.survey_id = s.id 
+        WHERE {$dateFilterClause}";
     if ($user_role === 'office_head') {
-        if (empty($user_office_id)) { throw new Exception("Office Head user is not assigned to an office.", 403); }
+        if (empty($user_office_id)) { 
+            throw new Exception("Office Head user is not assigned to an office.", 403); 
+        }
         $query .= " AND s.office_id = :user_office_id";
         $params[':user_office_id'] = $user_office_id;
     }
