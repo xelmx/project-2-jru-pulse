@@ -1,6 +1,5 @@
 <?php
     session_start(); //the very first thing on the page
-
     //Check if user is logged in and is an admin
     if (!isset($_SESSION['user_data']) || $_SESSION['user_data']['role'] !== 'admin') {
         
@@ -63,18 +62,11 @@
                 </div>
             </header>
 
+            <!--Main Dashboard Area-->
             <main class="flex-1 overflow-y-auto p-6">
+                <!-- "NO DATA" MESSAGE (HIDDEN BY DEFAULT)-->
+                <div id="no-data-message" class="hidden text-center py-20"><div class="bg-white rounded-lg shadow-sm border p-12"><i class="fas fa-info-circle text-5xl text-gray-300 mb-4"></i><h2 class="text-xl font-bold text-gray-700">No Data Available</h2><p class="text-gray-500 mt-2">There are no survey responses for the selected date range.</p></div></div>
 
-             <!-- "NO DATA" MESSAGE (HIDDEN BY DEFAULT)-->
-                <div id="no-data-message" class="hidden text-center py-20">
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-12">
-                        <i class="fas fa-info-circle text-5xl text-gray-300 mb-4"></i>
-                        <h2 class="text-xl font-bold text-gray-700">No Data Available</h2>
-                        <p class="text-gray-500 mt-2">There are no survey responses for the selected date range.</p>
-                    </div>
-                </div>
-
-                
                 <!-- Filters -->
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between mb-6 space-y-4 lg:space-y-0">
                     <div id="preset-filters" class="flex items-center space-x-2 flex-wrap">
@@ -84,94 +76,51 @@
                         <button data-period="this_year" class="filter-btn px-3 py-1 text-sm rounded-full mb-2">This Year</button>
                         <button data-period="all_time" class="filter-btn px-3 py-1 text-sm rounded-full mb-2">All Time</button>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-sm text-gray-600 font-medium">Custom Range:</span>
-                        <input type="date" id="startDate" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jru-blue w-36">
-                        <span class="text-gray-400">to</span>
-                        <input type="date" id="endDate" class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jru-blue w-36">
-                    </div>
+                    <div class="flex items-center space-x-2"><span class="text-sm text-gray-600 font-medium">Custom Range:</span><input type="date" id="startDate" class="px-3 py-2 border border-gray-300 rounded-lg w-36"><span class="text-gray-400">to</span><input type="date" id="endDate" class="px-3 py-2 border border-gray-300 rounded-lg w-36"></div>
                 </div>
-                <!-- Metrics Grid -->
-                <div id="metrics-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-3"><div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-smile text-jru-blue text-lg"></i></div></div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Overall Satisfaction</p>
-                            <div class="flex items-center">
-                                <span id="overall-satisfaction-score" class="text-2xl font-bold text-gray-900 mr-2">...</span>
-                                <div id="overall-satisfaction-stars" class="flex text-jru-gold"></div>
-                            </div>
+                
+                <div id="dashboard-content" class="hidden">
+                    <!-- KPI Banner -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600 mb-1">Overall Satisfaction</p><div class="flex items-baseline space-x-2"><span id="overall-satisfaction-score" class="text-3xl font-bold">...</span><div id="overall-satisfaction-stars" class="flex text-jru-gold"></div></div><p id="overall-satisfaction-comparison" class="text-xs text-gray-500 mt-1 h-4"></p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600 mb-1">Predicted Score</p><div class="flex items-baseline space-x-2"><span id="predicted-satisfaction-score" class="text-3xl font-bold">...</span><span class="text-xl text-gray-400">/ 5.0</span></div><p id="predicted-satisfaction-comparison" class="text-xs text-gray-500 mt-1 h-4"></p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600 mb-1">Total Responses</p><span id="total-responses" class="text-3xl font-bold">...</span><p id="total-responses-comparison" class="text-xs text-gray-500 mt-1 h-4"></p></div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600 mb-1">Feedback Freq. (Daily Avg)</p><span id="feedback-frequency" class="text-3xl font-bold">...</span><p class="text-xs text-gray-500 mt-1 h-4"></p></div>
+                    </div>
+
+                    <!-- Main Content Grid (Two Columns) -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold">Satisfaction Trends</h3><div class="h-64 mt-4"><canvas id="trendsChart"></canvas></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold">Service Performance</h3><div id="service-performance-bars" class="space-y-4 mt-4"></div></div>
                         </div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-3"><div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-chart-bar text-green-600 text-lg"></i></div></div>
-                        <div><p class="text-sm font-medium text-gray-600 mb-1">Total Responses</p><p id="total-responses" class="text-2xl font-bold text-gray-900">...</p></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-3"><div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center"><i class="fas fa-users text-purple-600 text-lg"></i></div></div>
-                        <div><p class="text-sm font-medium text-gray-600 mb-1">Feedback Freq. (Daily Avg)</p><p id="feedback-frequency" class="text-2xl font-bold text-gray-900">...</p></div>
-                    </div>
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-200 flex flex-col">
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center"><i class="fas fa-star text-jru-gold text-lg"></i></div>
-                            <p id="rating-dist-total" class="text-xs text-gray-500">... total</p>
-                        </div>
-                        <p class="text-sm font-medium text-gray-600 mb-2">Rating Distribution</p>
-                        <div class="flex-grow" style="position: relative; height: 120px;"> <!-- Chart container -->
-                            <canvas id="ratingDistChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <!-- Charts and Data Sections -->
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200" id="service-performance-card">
-                        <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-900">Service Performance</h3></div>
-                        <div id="service-performance-bars" class="space-y-4"></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-4"><h3 class="text-lg font-semibold text-gray-900">Sentiment Analysis</h3></div>
-                        <div class="chart-container"><canvas id="sentimentChart"></canvas></div>
-                        <div class="grid grid-cols-3 gap-4 mt-4">
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Positive</span></div><p id="sentiment-positive-percent" class="text-lg font-bold text-gray-900">...%</p></div>
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-gray-400 rounded-full mr-2"></div><span class="text-sm text-gray-600">Neutral</span></div><p id="sentiment-neutral-percent" class="text-lg font-bold text-gray-900">...%</p></div>
-                            <div class="text-center"><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div><span class="text-sm text-gray-600">Negative</span></div><p id="sentiment-negative-percent" class="text-lg font-bold text-gray-900">12%</p></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Satisfaction Trends</h3>
-                            <button id="open-trends-modal-btn" class="text-sm text-jru-blue hover:text-blue-800 font-medium"><i class="fas fa-expand-alt mr-1"></i></button>
-                        </div>
-                        <div class="chart-container" id="trends-chart-container"><canvas id="trendsChart"></canvas></div>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Common Feedback</h3>
-                        <div id="common-feedback-list" class="space-y-3">
-                            <div class="flex items-center justify-between p-3 bg-red-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Slow WiFi</span></div><span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">23</span></div>
-                            <div class="flex items-center justify-between p-3 bg-orange-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Limited Parking</span></div><span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded-full">18</span></div>
-                            <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Helpful Staff</span></div><span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">45</span></div>
-                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg"><div class="flex items-center"><span class="text-sm font-medium">Quick Service</span></div><span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">32</span></div>
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold">Sentiment Analysis</h3><div class="h-48 mt-4 flex justify-center"><canvas id="sentimentChart"></canvas></div><div id="sentiment-legend" class="grid grid-cols-3 gap-2 mt-4 text-center"></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold">Rating Distribution</h3><div class="h-48 mt-4"><canvas id="ratingDistChart"></canvas></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold">Common Feedback</h3><div id="common-feedback-list" class="h-48 overflow-y-auto space-y-2 pr-2 mt-4"></div></div>
                         </div>
                     </div>
                 </div>
             </main>
         </div>
+        
     </div>
-
-    <!-- Trends Chart Modal -->
-    <div id="trends-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-full flex flex-col">
-            <div class="flex items-center justify-between p-4 border-b">
-                <h3 class="text-xl font-semibold text-gray-900">Satisfaction Trends</h3>
-                <button id="close-trends-modal-btn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-2xl"></i></button>
-            </div>
-            <div class="p-6 flex-grow">
-                <div class="h-full w-full"><canvas id="modalTrendsChart"></canvas></div>
+    <!-- Trends Modal -->
+    <div id="trends-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[80vh] flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b flex-shrink-0">
+                <h3 class="text-xl font-semibold text-gray-900">Satisfaction Trends (Detailed View)</h3>
+             <!--   <button id="close-trends-modal-btn" class="text-gray-400 hover:text-gray-600 p-2 rounded-full"><i class="fas fa-times text-2xl"></i></button>
+--></div>
+            <div class="p-6 flex-grow overflow-hidden">
+                <div class="relative h-full w-full">
+                    <canvas id="modalTrendsChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
+
+    
 
     <!-- Feedback Details Modal -->
     <div id="feedback-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
@@ -184,56 +133,6 @@
         </div>
     </div>
 
-    <!-- Export Data Modal -->
-    <div id="export-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg">
-            <form id="export-form">
-                <div class="flex items-center justify-between p-4 border-b">
-                    <h3 class="text-xl font-semibold text-gray-900">Export Feedback Data</h3>
-                    <button type="button" id="close-export-modal-btn" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times text-2xl"></i></button>
-                </div>
-                <div class="p-6 space-y-6">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
-                        <div class="flex items-center space-x-2">
-                            <input type="date" id="export-startDate" required class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jru-blue w-full">
-                            <span class="text-gray-400">to</span>
-                            <input type="date" id="export-endDate" required class="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-jru-blue w-full">
-                        </div>
-                    </div>
-                    <div>
-                        <label for="export-office" class="block text-sm font-medium text-gray-700">Filter by Office</label>
-                        <select id="export-office" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-jru-blue focus:border-jru-blue sm:text-sm">
-                            <option value="all">All Offices</option>
-                            <!-- Options will be populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Columns to Include</label>
-                        <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="student_no" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Student No</span></label>
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="division" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Division</span></label>
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="office_name" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Office</span></label>
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="service" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Service</span></label>
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="service_outcome" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Ratings</span></label>
-                            <label class="flex items-center"><input type="checkbox" name="columns" value="suggestions" checked class="h-4 w-4 rounded border-gray-300 text-jru-blue focus:ring-jru-blue"> <span class="ml-2">Suggestions</span></label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">File Format</label>
-                        <div class="mt-2 flex space-x-4">
-                            <label class="flex items-center"><input type="radio" name="format" value="xlsx" checked class="h-4 w-4 text-jru-blue focus:ring-jru-blue border-gray-300"><span class="ml-2">Excel (.xlsx)</span></label>
-                            <label class="flex items-center"><input type="radio" name="format" value="csv" class="h-4 w-4 text-jru-blue focus:ring-jru-blue border-gray-300"><span class="ml-2">CSV</span></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-gray-50 px-6 py-3 flex justify-end">
-                    <button type="button" id="cancel-export-btn" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-jru-blue hover:bg-jru-navy">Export Data</button>
-                </div>
-            </form>
-        </div>
-    </div>
 
     <script src="js/main.js"></script>
     <script src="js/dashboard.js"></script>

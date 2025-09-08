@@ -1,312 +1,154 @@
 document.addEventListener('DOMContentLoaded', () => {
-    //Global Variables
+    // --- Global Variables for the NEW Layout ---
     const startDateInput = document.getElementById('startDate');
     const endDateInput = document.getElementById('endDate');
     const presetFiltersContainer = document.getElementById('preset-filters');
-    const metricsGrid = document.getElementById('metrics-grid'); // Main grid for metrics
-    const secondaryGrid = document.querySelector('.grid.lg\\:grid-cols-2'); // Grid for charts
-    const tertiaryGrid = document.querySelector('.grid.lg\\:grid-cols-3'); // Grid for trends/feedback
+    const dashboardContent = document.getElementById('dashboard-content');
     const noDataMessage = document.getElementById('no-data-message');
+    let trendsChart, ratingDistChart, sentimentChart;
 
-    let trendsChart, ratingDistChart, sentimentChart, modalTrendsChart; //Chart.js instances
-
-    
-    // --- CHART INITIALIZATION 
+    // --- CHART INITIALIZATION ---
     function initializeCharts() {
-        // Trends Chart 
-        const trendsCtx = document.getElementById('trendsChart').getContext('2d');
-        trendsChart = new Chart(trendsCtx, {
-            type: 'line',
-            data: { labels: [], datasets: [{ label: 'Satisfaction Score', data: [], borderColor: '#f59e0b', tension: 0.4 }] },
-            options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 5 } } }
-        });
-
-        // Initialize the Rating Distribution Bar Chart -->
         const ratingCtx = document.getElementById('ratingDistChart').getContext('2d');
-        ratingDistChart = new Chart(ratingCtx, {
-            type: 'bar',
-            data: {
-                labels: ['5', '4', '3', '2', '1'],
-                datasets: [{
-                    label: 'Count',
-                    data: [0, 0, 0, 0, 0],
-                    backgroundColor: ['#22c55e', '#3b82f6', '#facc15', '#f97316', '#ef4444'],
-                    borderRadius: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return ` ${context.raw} responses`;
-                            }
+        ratingDistChart = new Chart(ratingCtx, { 
+            type: 'bar', 
+            data: { 
+                labels: ['5', '4', '3', '2', '1'], 
+                datasets: [{ data: [], 
+                    backgroundColor: ['#22c55e', '#3b82f6', '#facc15', '#f97316', '#ef4444'], 
+                    borderRadius: 4 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { 
+                    legend: { display: false   
+                    } 
+                }, 
+                scales: { 
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { 
+                            precision: 0 
+                        } 
+                    }, 
+                    x: { 
+                        grid: { 
+                            display: false 
                         }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            precision: 0 // Ensure y-axis shows only whole numbers
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false // Hide the vertical grid lines
-                        }
-                    }
-                }
-            }
+                    } 
+                } 
+            } 
         });
-
         const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
-        sentimentChart = new Chart(sentimentCtx, {
-
-            type: 'doughnut',
-            data: {
-                labels: ['Positive', 'Neutral', 'Negative'],
-                datasets:[{
-                    data: [0, 0, 0], //Initial empty data
-                    backgroundColor: ['#22c55e', '#9ca3af', '#ef4444'],
-                    borderColor: '#ffffff',
-                    broderWidth: 2
-                }]
-            },
-
-            options: {
-                responsive: true,
-                maintainAspectRation: false,
-                plugins: {
-                   legend: { display: false},
-                   tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return ` ${context.label}: ${context.raw} comments`;
-                            }
-                        }
-                   }    
-                }
-            }
-        });
+        sentimentChart = new Chart(sentimentCtx, { type: 'doughnut', data: { labels: ['Positive', 'Neutral', 'Negative'], datasets: [{ data: [], backgroundColor: ['#22c55e', '#a1a1aa', '#ef4444'], borderColor: '#ffffff', borderWidth: 2 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } } });
+        const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+        trendsChart = new Chart(trendsCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Satisfaction Score', data: [], borderColor: '#f59e0b', tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 1, max: 5 }, x: { type: 'time', time: { unit: 'day', displayFormats: { day: 'MMM d' } } } } } });
     }
 
-    // --- DATA FETCHING  ---
+    // --- DATA FETCHING ---
     async function updateDashboard(params = {}) {
-        // --- more robust loading state ---
-        noDataMessage.classList.add('hidden'); // Hide any previous "no data" message
-        metricsGrid.classList.remove('hidden');
-        secondaryGrid.classList.remove('hidden');
-        tertiaryGrid.classList.remove('hidden');
-        metricsGrid.style.opacity = '0.5';
-        secondaryGrid.style.opacity = '0.5';
-        tertiaryGrid.style.opacity = '0.5';
-
-        const queryParams = new URLSearchParams(params);
+        dashboardContent.style.opacity = '0.5';
+        noDataMessage.classList.add('hidden');
+        dashboardContent.classList.remove('hidden');
         try {
-            const response = await fetch(`api/dashboard.php?${queryParams.toString()}`);
+            const response = await fetch(`api/dashboard.php?${new URLSearchParams(params)}`);
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const result = await response.json();
             if (!result.success) throw new Error(result.message);
-            
             updateUI(result.data);
-
         } catch (error) {
             console.error('Failed to update dashboard:', error);
-            // On failure, hide all data and show the "No Data" container with an error message ---
-            metricsGrid.classList.add('hidden');
-            secondaryGrid.classList.add('hidden');
-            tertiaryGrid.classList.add('hidden');
-            noDataMessage.querySelector('h2').textContent = 'Could Not Load Data';
-            noDataMessage.querySelector('p').textContent = 'An error occurred while fetching dashboard data. Please try again.';
+            dashboardContent.classList.add('hidden');
             noDataMessage.classList.remove('hidden');
         } finally {
-            // -- Remove the loading state ---
-            metricsGrid.style.opacity = '1';
-            secondaryGrid.style.opacity = '1';
-            tertiaryGrid.style.opacity = '1';
+            dashboardContent.style.opacity = '1';
         }
     }
 
+    // --- Helper for rendering comparison text ---
+    function renderComparison(elementId, change) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        if (change === null || change === undefined) { el.innerHTML = '&nbsp;'; return; }
+        const color = change > 0 ? 'text-green-500' : (change < 0 ? 'text-red-500' : 'text-gray-500');
+        const icon = change > 0 ? 'fa-arrow-up' : (change < 0 ? 'fa-arrow-down' : 'fa-minus');
+        const text = change === 0 ? 'No change' : `${Math.abs(change)}% vs. last period`;
+        el.innerHTML = `<span class="text-sm font-medium ${color}"><i class="fas ${icon} mr-1"></i>${text}</span>`;
+    }
+
+    // --- UI UPDATING ---
     function updateUI(data) {
-        // Update date inputs
+        if (data.total_responses === 0) {
+            dashboardContent.classList.add('hidden');
+            noDataMessage.classList.remove('hidden');
+            return;
+        }
         startDateInput.value = data.startDate;
         endDateInput.value = data.endDate;
 
-        // Update metric cards (no change)
+        document.getElementById('overall-satisfaction-score').textContent = data.overall_satisfaction.toFixed(1);
+        document.getElementById('predicted-satisfaction-score').textContent = data.predicted_satisfaction.toFixed(1);
         document.getElementById('total-responses').textContent = data.total_responses.toLocaleString();
-        const overallScore = data.overall_satisfaction.toFixed(1);
-        document.getElementById('overall-satisfaction-score').textContent = overallScore;
-        const start = new Date(data.startDate);
-        const end = new Date(data.endDate);
-        const dayDifference = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-        const dailyAverage = (data.total_responses / (dayDifference > 0 ? dayDifference : 1)).toFixed(1);
-        document.getElementById('feedback-frequency').textContent = dailyAverage;
+        const start = new Date(data.startDate), end = new Date(data.endDate);
+        const dayDiff = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+        document.getElementById('feedback-frequency').textContent = (data.total_responses / (dayDiff > 0 ? dayDiff : 1)).toFixed(1);
+        
+        renderComparison('overall-satisfaction-comparison', data.comparisons.overall_satisfaction_change);
+        renderComparison('predicted-satisfaction-comparison', data.comparisons.predicted_satisfaction_change);
+        renderComparison('total-responses-comparison', data.comparisons.total_responses_change);
+
         const starsContainer = document.getElementById('overall-satisfaction-stars');
         starsContainer.innerHTML = '';
         const roundedStars = Math.round(data.overall_satisfaction);
-        for (let i = 1; i <= 5; i++) {
-            starsContainer.innerHTML += `<i class="${i <= roundedStars ? 'fas' : 'far'} fa-star text-jru-gold"></i>`;
-        }
+        for (let i = 1; i <= 5; i++) { starsContainer.innerHTML += `<i class="${i <= roundedStars ? 'fas' : 'far'} fa-star text-jru-gold"></i>`; }
+
+        trendsChart.data.labels = data.trends_labels;
+        trendsChart.data.datasets[0].data = data.trends_data;
+        trendsChart.update();
+
+        const performanceContainer = document.getElementById('service-performance-bars');
+        performanceContainer.innerHTML = '';
+        if (data.service_performance && data.service_performance.length > 0) {
+            data.service_performance.forEach(item => { const percentage = (item.value / 5) * 100; performanceContainer.innerHTML += `<div><div class="flex justify-between text-sm mb-1"><span class="truncate pr-2">${item.label}</span><span class="font-medium flex-shrink-0">${item.value.toFixed(1)}/5.0</span></div><div class="w-full bg-gray-200 rounded-full h-2"><div class="bg-jru-blue h-2 rounded-full" style="width: ${percentage}%"></div></div></div>`; });
+        } else { performanceContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No performance data.</p>`; }
         
-        // URating Distribution Chart 
-       const ratingData = [data.rating_distribution[5], data.rating_distribution[4], data.rating_distribution[3], data.rating_distribution[2], data.rating_distribution[1]];
-        ratingDistChart.data.datasets[0].data = ratingData;
-        ratingDistChart.update();
-
-        // --- Chart: Satisfaction Trends ---
-    trendsChart.data.labels = data.trends_labels;
-    trendsChart.data.datasets[0].data = data.trends_data;
-    trendsChart.update();
-
-        //SERVICE PERFORMANCE
-    const performanceContainer = document.getElementById('service-performance-bars');
-    performanceContainer.innerHTML = ''; // Clear previous results
-
-    if (data.service_performance && data.service_performance.length > 0) {
-        data.service_performance.forEach(item => {
-            const percentage = (item.value / 5) * 100;
-            const performanceElement = `
-                <div>
-                    <div class="flex justify-between text-sm mb-1">
-                        <span class="truncate pr-2">${item.label}</span>
-                        <span class="font-medium flex-shrink-0">${item.value.toFixed(1)}/5.0</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-jru-blue h-2 rounded-full" style="width: ${percentage}%"></div>
-                    </div>
-                </div>`;
-            performanceContainer.innerHTML += performanceElement;
-        });
-    } else {
-        performanceContainer.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No specific service performance data for this period.</p>`;
-    }
-
-        // --- 1. Update Sentiment Analysis ---
         const sentiments = data.sentiment_analysis;
-        const totalSentiments = sentiments.Positive + sentiments.Neutral + sentiments.Negative;
-
-        // Update the doughnut chart
         sentimentChart.data.datasets[0].data = [sentiments.Positive, sentiments.Neutral, sentiments.Negative];
         sentimentChart.update();
-
-        // Update the percentage labels
-        const positivePercent = totalSentiments > 0 ? ((sentiments.Positive / totalSentiments) * 100).toFixed(0) : 0;
-        const neutralPercent = totalSentiments > 0 ? ((sentiments.Neutral / totalSentiments) * 100).toFixed(0) : 0;
-        const negativePercent = totalSentiments > 0 ? ((sentiments.Negative / totalSentiments) * 100).toFixed(0) : 0;
+        const sentimentLegend = document.getElementById('sentiment-legend');
+        sentimentLegend.innerHTML = ''; // Clear previous legend
+        const totalSentiments = sentiments.Positive + sentiments.Neutral + sentiments.Negative;
+        sentimentChart.data.labels.forEach((label, i) => {
+            const value = sentimentChart.data.datasets[0].data[i];
+            const percentage = totalSentiments > 0 ? ((value / totalSentiments) * 100).toFixed(0) : 0;
+            const color = sentimentChart.data.datasets[0].backgroundColor[i];
+            sentimentLegend.innerHTML += `<div><div class="flex items-center justify-center mb-1"><div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color};"></div><span class="text-sm text-gray-600">${label}</span></div><p class="text-lg font-bold text-gray-900">${percentage}%</p></div>`;
+        });
         
-        document.getElementById('sentiment-positive-percent').textContent = `${positivePercent}%`;
-        document.getElementById('sentiment-neutral-percent').textContent = `${neutralPercent}%`;
-        document.getElementById('sentiment-negative-percent').textContent = `${negativePercent}%`;
+        ratingDistChart.data.datasets[0].data = [data.rating_distribution[5], data.rating_distribution[4], data.rating_distribution[3], data.rating_distribution[2], data.rating_distribution[1]];
+        ratingDistChart.update();
 
-        // --- 2. Update Common Feedback ---
         const concernsList = document.getElementById('common-feedback-list');
-        const concernsData = data.common_concerns;
-        concernsList.innerHTML = ''; // Clear existing list
-
-        if (concernsData && concernsData.length > 0) {
-            // The API gives an array of arrays, e.g., [["wifi", 5], ["staff", 3]]
-            concernsData.forEach(item => {
-                const keyword = item[0];
+        concernsList.innerHTML = '';
+        if (data.common_concerns && data.common_concerns.length > 0) {
+            data.common_concerns.forEach(item => {
+                const keyword = item[0].charAt(0).toUpperCase() + item[0].slice(1).replace(/([A-Z])/g, ' $1').trim(); // Add spaces for camelCase
                 const count = item[1];
-                const concernElement = `
-                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                        <span class="text-sm font-medium text-gray-800">${keyword.charAt(0).toUpperCase() + keyword.slice(1)}</span>
-                        <span class="text-xs bg-gray-200 text-gray-700 font-bold px-2 py-1 rounded-full">${count}</span>
-                    </div>`;
-                concernsList.innerHTML += concernElement;
+                concernsList.innerHTML += `<div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg"><span class="text-sm font-medium text-gray-800">${keyword}</span><span class="text-xs bg-gray-200 text-gray-700 font-bold px-2 py-1 rounded-full">${count}</span></div>`;
             });
-        } else {
-            concernsList.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No common feedback topics found for this period.</p>`;
-        }
+        } else { concernsList.innerHTML = `<p class="text-sm text-gray-500 text-center py-4">No common topics found.</p>`; }
     }
     
-
+    // --- Event Listeners & Initial Load ---
     function setupEventListeners() {
-        // --- Date and Preset Filter Listeners ---
-        presetFiltersContainer.addEventListener('click', e => {
-            if (e.target.tagName === 'BUTTON' && e.target.classList.contains('filter-btn')) {
-                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                updateDashboard({ period: e.target.dataset.period });
-            }
-        });
-
-        const handleDateChange = () => {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            const startDate = startDateInput.value;
-            const endDate = endDateInput.value;
-            if (startDate && endDate && startDate <= endDate) {
-                updateDashboard({ startDate, endDate });
-            }
-        };
+        presetFiltersContainer.addEventListener('click', e => { if (e.target.tagName === 'BUTTON' && e.target.classList.contains('filter-btn')) { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); e.target.classList.add('active'); updateDashboard({ period: e.target.dataset.period }); } });
+        const handleDateChange = () => { document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active')); const startDate = startDateInput.value; const endDate = endDateInput.value; if (startDate && endDate && startDate <= endDate) { updateDashboard({ startDate, endDate }); } };
         startDateInput.addEventListener('change', handleDateChange);
         endDateInput.addEventListener('change', handleDateChange);
+    }
 
-        // --- Trends Chart Modal Listeners ---
-        const trendsModal = document.getElementById('trends-modal');
-        const openModalBtn = document.getElementById('open-trends-modal-btn');
-        const closeModalBtn = document.getElementById('close-trends-modal-btn');
-
-        if (openModalBtn) openModalBtn.addEventListener('click', () => trendsModal.classList.remove('hidden'));
-        if (closeModalBtn) closeModalBtn.addEventListener('click', () => trendsModal.classList.add('hidden'));
-        if (trendsModal) trendsModal.addEventListener('click', e => { if (e.target === trendsModal) trendsModal.classList.add('hidden') });
-
-        // --- Notification Bell & Dropdown Listeners ---
-        const notificationBell = document.getElementById('notification-bell');
-        const notificationDropdown = document.getElementById('notification-dropdown');
-        const markAllReadBtn = document.getElementById('mark-all-read-btn');
-        
-        if (notificationBell) {
-            notificationBell.addEventListener('click', e => {
-                e.stopPropagation();
-                notificationDropdown.style.display = notificationDropdown.style.display === 'block' ? 'none' : 'block';
-            });
-        }
-        document.addEventListener('click', () => {
-            if (notificationDropdown) notificationDropdown.style.display = 'none';
-        });
-        if (notificationDropdown) {
-            notificationDropdown.addEventListener('click', e => e.stopPropagation());
-        }
-        if (markAllReadBtn) {
-            // Note: need to create a function named markAllAsRead for this to work
-            // markAllReadBtn.addEventListener('click', markAllAsRead); 
-        }
-
-        // --- Feedback Details Modal (for notifications) ---
-        const feedbackModal = document.getElementById('feedback-modal');
-        const closeFeedbackModalBtn = document.getElementById('close-feedback-modal-btn');
-        
-        if (closeFeedbackModalBtn) closeFeedbackModalBtn.addEventListener('click', () => feedbackModal.classList.add('hidden'));
-        if (feedbackModal) feedbackModal.addEventListener('click', e => { if (e.target === feedbackModal) feedbackModal.classList.add('hidden') });
-
-        // --- Export Data Modal Listeners ---
-        const exportModal = document.getElementById('export-modal');
-        const openExportModalBtn = document.getElementById('open-export-modal-btn');
-        const closeExportModalBtn = document.getElementById('close-export-modal-btn');
-        const cancelExportBtn = document.getElementById('cancel-export-btn');
-        const exportForm = document.getElementById('export-form');
-
-        if (openExportModalBtn) {
-            openExportModalBtn.addEventListener('click', () => {
-                exportModal.classList.remove('hidden');
-                // Note: May need a function to initialize dates here
-                // initializeExportModal(); 
-            });
-        }
-        if (closeExportModalBtn) closeExportModalBtn.addEventListener('click', () => exportModal.classList.add('hidden'));
-        if (cancelExportBtn) cancelExportBtn.addEventListener('click', () => exportModal.classList.add('hidden'));
-        if (exportForm) {
-            // Note: Need to create a function to handle the export
-            // exportForm.addEventListener('submit', handleExportSubmit);
-        }
-}
-
-    // --- INITIAL LOAD ---
     initializeCharts();
     setupEventListeners();
     document.querySelector('.filter-btn[data-period="this_week"]').click();
