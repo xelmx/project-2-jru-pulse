@@ -68,11 +68,22 @@ $startDate = $_GET['startDate'] ?? null; $endDate = $_GET['endDate'] ?? null;
 if (!$startDate || !$endDate) {
     $end_dt_preset = new DateTime();
     switch ($period) {
-        case 'this_month': $start_dt_preset = new DateTime('first day of this month'); break;
-        case 'this_quarter': $month = $end_dt_preset->format('n'); $quarter = ceil($month / 3); $start_month = ($quarter - 1) * 3 + 1; $start_dt_preset = new DateTime(date('Y') . "-$start_month-01"); break;
-        case 'this_year': $start_dt_preset = new DateTime('first day of January this year'); break;
-        case 'all_time': $start_dt_preset = new DateTime('2020-01-01'); break;
-        default: $start_dt_preset = new DateTime('monday this week'); break;
+        case 'this_month': 
+            $start_dt_preset = new DateTime('first day of this month'); 
+            break;
+        case 'this_quarter': 
+            $month = $end_dt_preset->format('n'); $quarter = ceil($month / 3); 
+            $start_month = ($quarter - 1) * 3 + 1; $start_dt_preset = new DateTime(date('Y') . "-$start_month-01"); 
+            break;
+        case 'this_year': 
+            $start_dt_preset = new DateTime('first day of January this year'); 
+            break;
+        case 'all_time': 
+            $start_dt_preset = new DateTime('2020-01-01'); 
+            break;
+        default: 
+            $start_dt_preset = new DateTime('monday this week'); 
+            break;
     }
     $startDate = $start_dt_preset->format('Y-m-d'); $endDate = $end_dt_preset->format('Y-m-d');
 }

@@ -25,7 +25,7 @@
                 </a>
             </li>
             <li>
-                <a href="performance-analytics-reports.php" 
+                <a href="analytics.php" 
                    class="flex items-center px-3 py-3 rounded-lg transition-colors <?php echo ($currentPage === 'analytics') ? 'bg-blue-50 text-jru-blue font-medium' : 'text-gray-50 hover:bg-gray-600'; ?>">
                     <i class="fas fa-chart-line text-lg w-6"></i>
                     <span class="menu-text ml-3">Performance Analytics</span>
