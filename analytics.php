@@ -1,6 +1,10 @@
 <?php
     session_start();
-    if (!isset($_SESSION['user_data'])) { header('Location: index.php?error=auth_required'); exit; }
+    // This page is accessible to both 'admin' and 'office_head'
+    if (!isset($_SESSION['user_data'])) {
+        header('Location: index.php?error=auth_required');
+        exit;
+    }
     $user = $_SESSION['user_data'];
 ?>
 <!DOCTYPE html>
@@ -64,27 +68,61 @@
                     </div>
                 </div>
 
-                <!-- "NO DATA" MESSAGE & LOADING SPINNER (HIDDEN BY DEFAULT) -->
-                <div id="loading-message" class="text-center py-20"><i class="fas fa-spinner fa-spin text-4xl text-jru-blue"></i><p class="mt-2 text-gray-600">Loading Analytics...</p></div>
-                <div id="no-data-message" class="hidden text-center py-20">...</div>
+                <div id="loading-message" class="hidden text-center py-20"><i class="fas fa-spinner fa-spin text-4xl text-jru-blue"></i><p class="mt-2 text-gray-600">Loading Analytics...</p></div>
+                <div id="no-data-message" class="hidden text-center py-20"><div class="bg-white rounded-lg shadow-sm border p-12"><i class="fas fa-info-circle text-5xl text-gray-300 mb-4"></i><h2 class="text-xl font-bold text-gray-700">No Data Available</h2><p class="text-gray-500 mt-2">There are no survey responses for the selected filters.</p></div></div>
                 
-                <!-- Main Analytics Content -->
                 <div id="analytics-content" class="hidden space-y-6">
-                    <!-- KPI Section -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600">Overall Satisfaction</p><p id="kpi-overall-satisfaction" class="text-3xl font-bold text-gray-900 mt-1">...</p></div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600">Total Responses</p><p id="kpi-total-responses" class="text-3xl font-bold text-gray-900 mt-1">...</p></div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600">Net Promoter Score (NPS)</p><p id="kpi-nps" class="text-3xl font-bold text-gray-900 mt-1">...</p></div>
-                        <div class="bg-white p-4 rounded-xl shadow-sm border"><p class="text-sm font-medium text-gray-600">Excellent Rating %</p><p id="kpi-excellent-pct" class="text-3xl font-bold text-gray-900 mt-1">...%</p></div>
+                    <!-- Hero Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Satisfaction Trend & Forecast</h3><div class="h-80 mt-4"><canvas id="satisfactionTrendChart"></canvas></div></div>
+                        <div class="flex flex-col space-y-4">
+                            <div class="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col justify-center"><p class="text-sm font-medium text-gray-600 flex items-center"><i class="fas fa-star text-jru-gold mr-2"></i>Overall Satisfaction</p><div class="flex items-baseline space-x-2 mt-2"><span id="overall-satisfaction-score" class="text-4xl font-bold text-gray-900">...</span></div><p id="overall-satisfaction-comparison" class="text-xs mt-1 h-4"></p></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col justify-center"><p class="text-sm font-medium text-gray-600 flex items-center"><i class="fas fa-wand-magic-sparkles text-purple-500 mr-2"></i>Predicted Satisfaction</p><span id="predicted-satisfaction-kpi" class="text-4xl font-bold text-gray-900">...</span><p class="text-xs text-gray-500 mt-1">Forecast for next period</p></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col justify-center"><p class="text-sm font-medium text-gray-600 flex items-center"><i class="fas fa-poll text-green-500 mr-2"></i>Total Responses</p><span id="total-responses" class="text-4xl font-bold text-gray-900">...</span><p id="total-responses-comparison" class="text-xs mt-1 h-4"></p></div>
+                            <div class="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col justify-center">
+                                <p class="text-sm font-medium text-gray-600 flex items-center">
+                                    <i class="fas fa-bullhorn text-blue-500 mr-2"></i>Net Promoter Score (NPS)
+                                </p>
+                                <span id="nps-score" class="text-4xl font-bold text-gray-900">...</span>
+                                <p class="text-xs text-gray-500 mt-1">Promoters vs. Detractors</p>
+                            </div>
+
+                            <div class="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col justify-center">
+                                <p class="text-sm font-medium text-gray-600 flex items-center">
+                                    <i class="fas fa-award text-yellow-500 mr-2"></i>Excellent Rating %
+                                </p>
+                                <span id="excellent-rating-percentage" class="text-4xl font-bold text-gray-900">...</span>
+                                <p class="text-xs text-gray-500 mt-1">Percentage of '5-star' ratings</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Charts Grid -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Performance by Day of the Week</h3><div class="h-64 mt-4"><canvas id="performanceByDayChart"></canvas></div></div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Satisfaction by Student Division</h3><div class="h-64 mt-4"><canvas id="satisfactionByDivisionChart"></canvas></div></div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Satisfaction by Respondent Type</h3><div class="h-64 mt-4"><canvas id="satisfactionByTypeChart"></canvas></div></div>
-                        <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Rating Distribution</h3><div class="h-64 mt-4"><canvas id="ratingDistChart"></canvas></div></div>
-                        <div id="service-breakdown-card" class="bg-white p-6 rounded-xl shadow-sm border hidden lg:col-span-2"><h3 class="text-lg font-semibold text-gray-800">Service-Level Breakdown</h3><div class="h-64 mt-4"><canvas id="serviceBreakdownChart"></canvas></div></div>
+                    <!-- Office Performance Section -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Office Performance Breakdown</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                            <div><h4 class="text-sm font-semibold text-green-700 mb-2 pb-1 border-b">Top 3 Performing Offices</h4><div id="top-offices-list" class="space-y-2"></div></div>
+                            <div><h4 class="text-sm font-semibold text-red-700 mb-2 pb-1 border-b">3 Offices Needing Attention</h4><div id="bottom-offices-list" class="space-y-2"></div></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insights Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Sentiment Breakdown</h3><div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center"><div class="h-48 flex justify-center"><canvas id="sentimentDoughnutChart"></canvas></div><div id="sentiment-breakdown-list"></div></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Sentiment Trend & Forecast</h3><div class="h-64 mt-4"><canvas id="sentimentTrendChart"></canvas></div></div>
+                        </div>
+                        <div class="space-y-6">
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Service Performance</h3><div id="service-performance-bars" class="space-y-4 mt-4"></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="text-lg font-semibold text-gray-800">Rating Distribution</h3><div class="h-48 mt-4"><canvas id="ratingDistChart"></canvas></div></div>
+                            <div class="bg-white p-6 rounded-xl shadow-sm border">
+                                <div id="feedback-tabs-container">
+                                    <div class="border-b border-gray-200"><nav class="-mb-px flex space-x-6"><button id="common-feedback-tab" class="py-2 px-1 border-b-2 font-medium text-sm border-jru-blue text-jru-blue">Common Feedback</button><button id="recent-comments-tab" class="py-2 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300">Recent Comments</button></nav></div>
+                                    <div id="common-feedback-content" class="h-64 overflow-y-auto space-y-2 pr-2 mt-4"></div>
+                                    <div id="recent-comments-content" class="hidden h-64 overflow-y-auto space-y-3 pr-2 mt-4"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>
